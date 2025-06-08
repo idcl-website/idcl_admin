@@ -13,14 +13,27 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
+
 export default function DashboardHeader() {
     const pathname = usePathname()
     const [currentPath, setCurrentPath] = useState<string>('')
 
     useEffect(() => {
-        const title = pathname.split('/').filter(Boolean)
-        const name = title[title.length - 1]
-        setCurrentPath(name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
+        const segments = pathname.split('/').filter(Boolean)
+
+
+        let displaySegment = segments[segments.length - 1]
+
+        if (!isNaN(Number(displaySegment))) {
+            displaySegment = segments[segments.length - 2] || displaySegment
+        }
+
+        setCurrentPath(
+            displaySegment
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ')
+        )
     }, [pathname])
 
     return (
@@ -35,11 +48,11 @@ export default function DashboardHeader() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuItem>
-                            <User className="h-4 w-4" />
+                            <User className="h-4 w-4 mr-2" />
                             <span>Profile</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                            <LogOut className="h-4 w-4" />
+                            <LogOut className="h-4 w-4 mr-2" />
                             <span>Logout</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
