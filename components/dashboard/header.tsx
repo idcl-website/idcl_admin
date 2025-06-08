@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react'
 import user from '@/assets/icons/user.png'
 import dropdown from '@/assets/icons/dropdown.svg'
 import Image from "next/image"
-
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LogOut, User } from "lucide-react"
 export default function DashboardHeader() {
     const pathname = usePathname()
     const [currentPath, setCurrentPath] = useState<string>('')
@@ -21,9 +29,21 @@ export default function DashboardHeader() {
             <div className="flex items-center gap-[8px]">
                 <Image src={user} alt="user" priority width={23} height={23} />
                 <p className="text-[#000] text-[14px] font-bold leading-normal">Jon Doe</p>
-                <button>
-                    <Image src={dropdown} alt="user" priority width={23} height={23} />
-                </button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <Image src={dropdown} alt="user" priority width={23} height={23} />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>
+                            <User className="h-4 w-4" />
+                            <span>Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <LogOut className="h-4 w-4" />
+                            <span>Logout</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
     )

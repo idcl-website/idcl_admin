@@ -21,9 +21,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="grid grid-cols-[208px_1fr]">
       <AsideView />
-      <main className="">
+      <section className="space-y-6 px-[30px]">
         <DashboardHeader />
-      </main>
+        <main>
+          {children}
+        </main>
+      </section>
     </div>
   )
 }

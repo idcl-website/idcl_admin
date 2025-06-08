@@ -2,6 +2,6 @@
 
 export default function TalentPage() {
     return (
-        <div>Sullivan Emerald Josh</div>
+        <div>Sullivan the greatest software Engineer</div>
     )
 }
