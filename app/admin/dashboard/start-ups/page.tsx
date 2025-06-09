@@ -17,13 +17,13 @@ import ExploreStartUp from "@/components/dashboard/startups";
 const startUpFilters = [
     {
         title: 'sort',
-        options: ['Show All', 'ascending', 'decending',],
+        options: ['Show All', 'Approved', 'Pending', 'Rejected'],
         width: 163,
         selectWidth: 106
     },
     {
-        title: 'industry',
-        options: ['B2B', 'B2A', 'B2C',],
+        title: 'type',
+        options: ['B2B', 'B2C', 'B2B2C', 'B2E', 'B2G', 'C2B', 'C2C', 'D2C', 'G2C', 'G2B'],
         width: 182,
         selectWidth: 106
     },
@@ -129,7 +129,7 @@ export default function Dashboardpage() {
                             />
                         </div>
 
-                        {/* Filter Section - Responsive Layout */}
+
                         <div className="flex items-start gap-[10px] w-full self-stretch">
                             {startUpFilters.map((filter, index) => (
                                 <div key={index} className={`h-[35px] w-full md:w-[${filter.width}px]! rounded-[8px] py-[5px] px-[12px] bg-[#F0F2F5] flex items-center gap-[11px]`}>
