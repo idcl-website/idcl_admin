@@ -290,96 +290,110 @@ export default function CreateStartUpPage() {
                                             </p>
                                         </div>
                                     </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Add Founder</DialogTitle>
-                                            <DialogDescription>
-                                                This action cannot be undone. This will permanently delete your account
-                                                and remove your data from our servers.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <form className="w-full overflow-y-auto">
-                                            <div className="w-full grid grid-cols-1 gap-2">
-                                                {FoundersData.map((item, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={cn(
-                                                            "gap-1.5 mb-3 sm:mb-3 lg:mb-4",
-                                                        )}
+                                    <DialogContent className="">
+                                        <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
+                                            <DialogTitle className="text-[30px] font-bold text-[#344054]">Add Founder</DialogTitle>
+                                            <form className="w-full ">
+                                                <div className="w-full grid grid-cols-1 gap-2">
+                                                    {FoundersData.map((item, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className={cn(
+                                                                "gap-1.5 mb-3 sm:mb-3 lg:mb-4",
+                                                            )}
+                                                        >
+                                                            <Label htmlFor={item.name} className="">
+                                                                {item.label}
+                                                            </Label>
+
+                                                            {item.type === 'select' ? (
+                                                                <Select>
+                                                                    <SelectTrigger className="w-full text-[14px] sm:text-[15px] lg:text-[16px]">
+                                                                        <SelectValue placeholder={item.placeholder} />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {item.options?.map((option, i) => (
+                                                                            <SelectItem key={i} value={option.toLowerCase().replace(' ', '-')}>
+                                                                                {option}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            ) : item.type === 'photo' ? (
+                                                                <FileUploader
+                                                                    accept=".png,.jpg,.jpeg,"
+                                                                    maxSize={500 * 1024}
+                                                                    onDrop={(files) => {
+                                                                        const file = files[0];
+                                                                        if (file) {
+                                                                            // const img = new Image();
+                                                                            // img.onload = () => {
+                                                                            //     if (img.width !== img.height) {
+                                                                            //         alert("Logo must be square (1:1 aspect ratio)");
+                                                                            //         return;
+                                                                            //     }
+                                                                            // };
+                                                                            // img.src = URL.createObjectURL(file);
+                                                                            console.log(file)
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            ) : item.type === 'textarea' ? (
+                                                                <Textarea
+                                                                    id={item.name}
+                                                                    name={item.name}
+                                                                    placeholder={item.placeholder}
+                                                                    className="w-full min-h-[120px] sm:min-h-[110px] lg:min-h-[120px] text-[14px] sm:text-[15px] lg:text-[16px]"
+                                                                />
+                                                            ) : item.type === 'date' ? (
+                                                                <Popover>
+                                                                    <PopoverTrigger asChild>
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            data-empty={!date}
+                                                                            className="data-[empty=true]:text-muted-foreground w-full bg-white border-[#E1E5EB] h-[46px] justify-start text-left font-normal"
+                                                                        >
+                                                                            <CalendarIcon />
+                                                                            {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                                                        </Button>
+                                                                    </PopoverTrigger>
+                                                                    <PopoverContent className="w-auto p-0 ml-8 " align="start">
+                                                                        <Calendar mode="single" selected={date} onSelect={setDate} />
+                                                                    </PopoverContent>
+                                                                </Popover>
+                                                            ) : (
+                                                                <Input
+                                                                    type={item.type}
+                                                                    id={item.name}
+                                                                    name={item.name}
+                                                                    placeholder={item.placeholder}
+                                                                    className="w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    ))}
+
+                                                </div>
+
+                                                <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
+                                                    <button
+                                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
                                                     >
-                                                        <Label htmlFor={item.name} className="">
-                                                            {item.label}
-                                                        </Label>
-
-                                                        {item.type === 'select' ? (
-                                                            <Select>
-                                                                <SelectTrigger className="w-full text-[14px] sm:text-[15px] lg:text-[16px]">
-                                                                    <SelectValue placeholder={item.placeholder} />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {item.options?.map((option, i) => (
-                                                                        <SelectItem key={i} value={option.toLowerCase().replace(' ', '-')}>
-                                                                            {option}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                        ) : item.type === 'photo' ? (
-                                                            <FileUploader
-                                                                accept=".png,.jpg,.jpeg,"
-                                                                maxSize={500 * 1024}
-                                                                onDrop={(files) => {
-                                                                    const file = files[0];
-                                                                    if (file) {
-                                                                        // const img = new Image();
-                                                                        // img.onload = () => {
-                                                                        //     if (img.width !== img.height) {
-                                                                        //         alert("Logo must be square (1:1 aspect ratio)");
-                                                                        //         return;
-                                                                        //     }
-                                                                        // };
-                                                                        // img.src = URL.createObjectURL(file);
-                                                                        console.log(file)
-                                                                    }
-                                                                }}
-                                                            />
-                                                        ) : item.type === 'textarea' ? (
-                                                            <Textarea
-                                                                id={item.name}
-                                                                name={item.name}
-                                                                placeholder={item.placeholder}
-                                                                className="w-full min-h-[120px] sm:min-h-[110px] lg:min-h-[120px] text-[14px] sm:text-[15px] lg:text-[16px]"
-                                                            />
-                                                        ) : item.type === 'date' ? (
-                                                            <Popover>
-                                                                <PopoverTrigger asChild>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        data-empty={!date}
-                                                                        className="data-[empty=true]:text-muted-foreground w-full bg-white border-[#E1E5EB] h-[46px] justify-start text-left font-normal"
-                                                                    >
-                                                                        <CalendarIcon />
-                                                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                                                    </Button>
-                                                                </PopoverTrigger>
-                                                                <PopoverContent className="w-auto p-0 ml-8 " align="start">
-                                                                    <Calendar mode="single" selected={date} onSelect={setDate} />
-                                                                </PopoverContent>
-                                                            </Popover>
-                                                        ) : (
-                                                            <Input
-                                                                type={item.type}
-                                                                id={item.name}
-                                                                name={item.name}
-                                                                placeholder={item.placeholder}
-                                                                className="w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                ))}
-
-                                            </div>
-                                        </form>
+                                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                                            Add More
+                                                        </p>
+                                                    </button>
+                                                    <button
+                                                        type="submit"
+                                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
+                                                    >
+                                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
+                                                            Done
+                                                        </p>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </DialogHeader>
                                     </DialogContent>
                                 </Dialog>
                                 <button

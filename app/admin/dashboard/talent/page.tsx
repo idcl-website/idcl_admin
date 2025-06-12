@@ -1,7 +1,235 @@
+"use client"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import talent from '@/assets/images/talent.png'
+import Image from "next/image";
+import more from '@/assets/icons/more.svg'
+import { useRouter } from "next/navigation";
 
+const TalentFilters = [
+    {
+        title: 'sort',
+        options: ['Show All', 'Approved', 'Pending', 'Rejected'],
+        width: 163,
+        selectWidth: 106
+    },
+    {
+        title: 'batch',
+        options: [2025, 2026, 2027, 2028],
+        width: 127,
+        selectWidth: 62
+    },
+]
+
+const TalentData = [
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+    {
+        image: talent,
+        name: 'Pedro Macejkovic',
+        email: 'Pedro@gmail.com',
+        track: 'Developer',
+        date: '11/6/2022'
+    },
+
+]
 
 export default function TalentPage() {
+    const router = useRouter();
     return (
-        <div>Sullivan the greatest software Engineer</div>
+        <div className="space-y-6">
+            <aside className="w-full flex gap-2 md:gap-[20px] items-center flex-col md:flex-row py-[6px] px-[12px] bg-white rounded-[10px]">
+                <div className="relative w-full md:max-w-[766px]">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search"
+                        className="pl-10 rounded-[16px] w-full bg-white"
+                    />
+                </div>
+
+
+                <div className="flex items-start gap-[10px]">
+                    {TalentFilters.map((filter, index) => (
+                        <div key={index} className={`w-full md:min-w-[${filter.width}px] h-[35px] rounded-[8px] py-[5px] px-[12px] bg-[#F0F2F5] flex items-center gap-[11px]`}>
+                            <p className="font-inter font-normal text-xs sm:text-sm md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
+                                {filter.title}
+                            </p>
+
+                            <Select>
+                                <SelectTrigger
+                                    className={`w-full md:w-[${filter.selectWidth}px] h-[25px]! rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]`}
+                                >
+                                    <SelectValue
+                                        placeholder={
+                                            <span className="font-inter font-normal text-xs sm:text-sm md:text-[10px] text-[#667085] leading-[14px]">
+                                                {filter.options[0]}
+                                            </span>
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent
+                                    className="rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
+                                    position="popper"
+                                    align="end"
+                                >
+                                    {filter.options.map((option, optionIndex) => (
+                                        <SelectItem
+                                            key={optionIndex}
+                                            value={option.toString()}
+                                            className="font-inter font-medium text-xs sm:text-sm md:text-[10px] focus:bg-[#D0D5DD]"
+                                        >
+                                            {option}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    ))}
+                </div>
+            </aside >
+
+            <section>
+                <div className="w-full pt-[16px] rounded-t-[10px] flex items-center justify-between pr-[19px] pb-[15px] pl-[19px] bg-[#fff]">
+                    <div>
+                        <div className="flex items-center gap-[6.6px]">
+                            <span className="text-[#101828] text-[16px] font-medium leading-[23px]">Talent Pool</span>
+                            <p className="bg-[#F7FAFF] rounded-[13px] text-[#005DFF] text-[9px] font-inter font-medium leading-[14px] py-1 px-2">10,000 Registered</p>
+                        </div>
+                        <p className="text-[#667085] text-[12px] font-normal leading-[16px]">Certified students from skill-up imo program</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            router.push('/admin/dashboard/talent/add-talent')
+                        }}
+                        className="
+                        rounded-[6.643px] 
+                        border border-[0.83px] border-[#005DFF] 
+                        bg-[#005DFF] 
+                        shadow-[0px_0.83px_1.661px_rgba(16,24,40,0.05)]
+                        text-white 
+                        flex items-center justify-center gap-[6px] w-[99px] h-[33px]
+                    "
+                    >
+                        <span className="font-inter text-[#fff] text-[11.626px] font-medium leading-[16px]">Add</span>
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="18" viewBox="0 0 17 18" fill="none">
+                            <path d="M8.47897 3.9248V13.6132M3.63477 8.76901H13.3232" stroke="white" stroke-width="1.38683" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+                <div>
+                    <Table className="">
+                        <TableHeader className="">
+                            <TableRow className="w-full bg-[#FCFCFD] text-[#667085]">
+                                <TableHead className="w-[100px]">Serial Number</TableHead>
+                                <TableHead>Image</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Skill</TableHead>
+                                <TableHead>Date Added</TableHead>
+                                <TableHead className="text-right"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody className="bg-[#fff]">
+                            {[...Array(12)].map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium font-Inter text-[11px]">{index + 1}</TableCell>
+                                    <TableCell><Image src={talent} alt="talent" priority /></TableCell>
+                                    <TableCell className="text-[#101828] font-medium">Darla Schroeder</TableCell>
+                                    <TableCell className="text-[#667085]">Pedro@gmail.com</TableCell>
+                                    <TableCell className="text-[#667085]">Developer</TableCell>
+                                    <TableCell className="text-[#667085]">11/6/2022</TableCell>
+                                    <TableCell className="text-right"><Image src={more} alt="more" priority /></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </section>
+        </div>
     )
 }

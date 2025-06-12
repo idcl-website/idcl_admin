@@ -119,7 +119,7 @@ export default function Dashboardpage() {
     return (
         <div className="space-y-6">
             <div className="w-full flex items-center gap-[40px]">
-                <div className="w-full md:max-w-[949px] py-[11px] px-[30px] bg-white rounded-[10px]">
+                <div className="w-full md:max-w-[949px] py-[11px] px-[20px] bg-white rounded-[10px]">
                     <aside className="w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-[20px]">
                         <div className="relative w-full md:max-w-[410px]">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -130,7 +130,7 @@ export default function Dashboardpage() {
                         </div>
 
 
-                        <div className="flex items-start gap-[10px] w-full self-stretch">
+                        <div className={`w-full flex items-start gap-[10px]`}>
                             {startUpFilters.map((filter, index) => (
                                 <div key={index} className={`h-[35px] w-full md:w-[${filter.width}px]! rounded-[8px] py-[5px] px-[12px] bg-[#F0F2F5] flex items-center gap-[11px]`}>
                                     <p className="font-inter font-normal text-xs sm:text-sm md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
