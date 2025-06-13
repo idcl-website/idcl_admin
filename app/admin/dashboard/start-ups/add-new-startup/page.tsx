@@ -33,10 +33,6 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import { toast, Toaster } from 'sonner'
-import * as yup from 'yup';
-import { useFormik } from 'formik';
-import { founderSchema, startupSchema } from "@/validation/startup"
-
 
 type FounderInterface = {
     name: string,
@@ -245,34 +241,6 @@ export default function CreateStartUpPage() {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [founderErrors, setFounderErrors] = useState<Record<string, string>>({});
-
-
-    const formik = useFormik({
-        initialValues: startupValue,
-        validationSchema: startupSchema,
-        onSubmit: async (values) => {
-            setIsSubmitting(true);
-            try {
-                // Convert date to ISO string if it's a Date object
-                const submitValues = {
-                    ...values,
-                    date: values.date instanceof Date ? values.date.toISOString() : values.date,
-                };
-
-                console.log('Submitting:', submitValues);
-                // Here you would typically send the data to your backend
-                // await submitToBackend(submitValues);
-
-                toast.success('Startup created successfully!');
-                router.push('/success-page'); // Redirect on success
-            } catch (error) {
-                toast.error('Failed to create startup');
-                console.error('Submission error:', error);
-            } finally {
-                setIsSubmitting(false);
-            }
-        },
-    });
 
 
     const onChangeHandler = (field: keyof startupDto, value: any) => {
