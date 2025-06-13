@@ -241,6 +241,7 @@ export default function CreateStartUpPage() {
     const [founder, setFounder] = useState<FounderInterface>(FoundersDto)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [isUploading, setIsUploading] = useState<boolean>(false)
+    const [isUploadingFounder, setIsUploadingFounder] = useState<boolean>(false)
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [founderErrors, setFounderErrors] = useState<Record<string, string>>({});
 
@@ -288,6 +289,7 @@ export default function CreateStartUpPage() {
                     ...prev,
                     logo: data.secure_url
                 }))
+                toast.success('image upload successful')
             } else {
                 toast.error('Logo upload failed')
             }
@@ -295,6 +297,40 @@ export default function CreateStartUpPage() {
             toast.error('Logo upload failed')
         } finally {
             setIsUploading(false)
+        }
+    };
+
+
+    const uploadFounderImage = async (file: File): Promise<string | null> => {
+        setIsUploadingFounder(true);
+        try {
+            const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
+            const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", uploadPreset!);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log(data.secure_url)
+                toast.success('Image added successfully');
+                return data.secure_url;
+            } else {
+                toast.error('Image upload failed');
+                return null;
+            }
+        } catch (error) {
+            toast.error('Image upload failed');
+            return null;
+        } finally {
+            setIsUploadingFounder(false);
         }
     };
 
@@ -383,29 +419,29 @@ export default function CreateStartUpPage() {
         }
     };
 
-    const handleFileUpload = (field: keyof startupDto, file: File) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const result = reader.result as string;
-            setFormData(prev => ({
-                ...prev,
-                [field]: result
-            }));
-            validateField(field, result);
-        };
-        reader.readAsDataURL(file);
-    };
+    // const handleFileUpload = (field: keyof startupDto, file: File) => {
+    //     const reader = new FileReader();
+    //     reader.onloadend = () => {
+    //         const result = reader.result as string;
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             [field]: result
+    //         }));
+    //         validateField(field, result);
+    //     };
+    //     reader.readAsDataURL(file);
+    // };
 
-    const handleFounderFileUpload = (field: keyof FounderInterface, file: File) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFounder(prev => ({
-                ...prev,
-                [field]: reader.result as string
-            }));
-        };
-        reader.readAsDataURL(file);
-    };
+    // const handleFounderFileUpload = (field: keyof FounderInterface, file: File) => {
+    //     const reader = new FileReader();
+    //     reader.onloadend = () => {
+    //         setFounder(prev => ({
+    //             ...prev,
+    //             [field]: reader.result as string
+    //         }));
+    //     };
+    //     reader.readAsDataURL(file);
+    // };
 
     const handleDateChange = (date: Date | undefined) => {
         setDate(date);
@@ -441,6 +477,12 @@ export default function CreateStartUpPage() {
     };
 
     const handleAddFounder = async () => {
+
+        if (!founder.photo) {
+            toast.error('Please upload a founder photo');
+            return;
+        }
+
         const isValid = await validateFounderForm(founder);
         if (isValid) {
             setFormData((prev) => ({
@@ -496,7 +538,7 @@ export default function CreateStartUpPage() {
                             <h1 className="font-figtree text-[21px] font-bold leading-[31px]">
                                 Start-Up Details
                             </h1>
-                            <div className="min-h-[100px] min-w-[100px] relative">
+                            <div className="min-h-[100px] min-w-[100px] relative flex items-center justify-center">
                                 {isUploading && <LoaderCircle className="animate-spin" />}
 
                                 {!isUploading && formdata.logo === "" && (
@@ -504,12 +546,12 @@ export default function CreateStartUpPage() {
                                 )}
 
                                 {!isUploading && formdata.logo !== "" && (
-                                    <Image
+                                    <img
                                         src={formdata.logo}
                                         alt="start-up logo"
-                                        fill
-                                        priority
-                                        className="object-contain"
+                                        className="object-contain rounded-lg"
+                                        width={100}
+                                        height={100}
                                     />
                                 )}
                             </div>
@@ -521,7 +563,7 @@ export default function CreateStartUpPage() {
                                     <div
                                         key={index}
                                         className={cn(
-                                            "grid items-center gap-1.5 mb-3 sm:mb-3 lg:mb-4",
+                                            "grid items-center gap-1.5 mb-3 sm:mb-3 lg:mb-4 relative",
                                             item.full ? "md:col-span-2" : "md:col-span-1"
                                         )}
                                     >
@@ -615,9 +657,12 @@ export default function CreateStartUpPage() {
                                                         formErrors[item.name] && "border-red-500"
                                                     )}
                                                 />
-                                                {formErrors[item.name] && (
-                                                    <p className="text-red-500 text-sm mt-1">{formErrors[item.name]}</p>
-                                                )}
+                                                <div className="absolute top-0 right-0">
+                                                    {formErrors[item.name] && (
+                                                        <p className="text-red-500 text-sm mt-1">{formErrors[item.name]}</p>
+                                                    )}
+                                                </div>
+
                                             </>
                                         )}
                                     </div>
@@ -655,9 +700,17 @@ export default function CreateStartUpPage() {
                                                                         <FileUploader
                                                                             accept="image/*"
                                                                             maxSize={500 * 1024}
-                                                                            onDrop={(files) => {
+                                                                            onDrop={async (files) => {
                                                                                 const file = files[0];
-                                                                                if (file) handleFounderFileUpload(item.name as keyof FounderInterface, file);
+                                                                                if (file) {
+                                                                                    const url = await uploadFounderImage(file as any);
+                                                                                    if (url) {
+                                                                                        setFounder(prev => ({
+                                                                                            ...prev,
+                                                                                            photo: url
+                                                                                        }));
+                                                                                    }
+                                                                                }
                                                                             }}
                                                                         />
                                                                         {founderErrors[item.name] && (
@@ -699,11 +752,14 @@ export default function CreateStartUpPage() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setOpenDialog(false)}
+                                                            onClick={() => {
+                                                                setOpenDialog(false)
+                                                                setFounder(FoundersDto)
+                                                            }}
                                                             className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
                                                         >
                                                             <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
-                                                                Done
+                                                                {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
                                                             </p>
                                                         </button>
                                                     </div>
