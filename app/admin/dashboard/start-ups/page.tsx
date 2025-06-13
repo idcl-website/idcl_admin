@@ -174,7 +174,7 @@ export default function Dashboardpage() {
                     onClick={() => {
                         router.push('/admin/dashboard/start-ups/add-new-startup')
                     }}
-                    className="bg-[#005EFF] w-full md:w-[123px] py-[11.5px] px-[20px] rounded-[10px]"
+                    className="bg-[#005EFF] w-full md:w-[123px] py-[11.5px] px-[20px] rounded-[10px] cursor-pointer"
                 >
                     <span className="font-roboto text-white text-[15px] font-medium leading-normal">Add New</span>
                 </button>
