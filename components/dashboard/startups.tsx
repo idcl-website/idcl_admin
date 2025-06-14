@@ -14,7 +14,7 @@ interface StartUP {
 
 export default function ExploreStartUp({ id, startUpName, ecosystem, description, story }: StartUP) {
     return (
-        < div className="relative border border-solid border-[#E4E4E4] rounded-lg lg:rounded-[12px] bg-white w-full lg:w-[342px] pt-8 sm:pt-10 lg:pt-[27px] px-4 sm:px-5 lg:px-[20px] pb-5 sm:pb-6 lg:pb-[14px] flex flex-col items-start gap-4 sm:gap-5 lg:gap-[18px]" >
+        <div className="relative border border-solid border-[#E4E4E4] rounded-lg lg:rounded-[12px] bg-white w-full lg:w-[342px] pt-8 sm:pt-10 lg:pt-[27px] px-4 sm:px-5 lg:px-[20px] pb-5 sm:pb-6 lg:pb-[14px] flex flex-col items-start gap-4 sm:gap-5 lg:gap-[18px]" >
 
             <button className="absolute right-4 sm:right-5 lg:right-[20px] top-4 sm:top-5 lg:top-[20px]">
                 <Image src={followIcon} alt="favourite-icon" width={27} height={26} priority />

@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploader } from "@/components/ui/file-uploader";
+import { Uploader } from "@/components/ui/uploader";
 import { useState } from 'react'
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
@@ -36,6 +37,7 @@ import Image from "next/image";
 import { toast, Toaster } from 'sonner'
 import { startupSchema, founderSchema } from "@/validation/startup";
 import { LoaderCircle } from 'lucide-react'
+import { startUpService } from "@/services/startup";
 
 type FounderInterface = {
     name: string,
@@ -55,7 +57,7 @@ const FoundersDto = {
     photo: ''
 }
 
-interface startupDto {
+export interface startupDto {
     logo: string,
     name: string,
     location: string,
@@ -91,7 +93,7 @@ interface FormField {
     label: string;
     name: string;
     placeholder?: string;
-    type: 'text' | 'select' | 'photo' | 'textarea' | 'date';
+    type: 'text' | 'select' | 'image' | 'textarea' | 'date';
     full?: boolean;
     options?: string[];
 }
@@ -100,7 +102,7 @@ const startUpData: FormField[] = [
     {
         label: 'logo',
         name: 'logo',
-        type: 'photo',
+        type: 'image',
         full: true
     },
     {
@@ -264,9 +266,47 @@ export default function CreateStartUpPage() {
         validateFounderField(field, value);
     }
 
+    const uploadFounderImage = async (file: File): Promise<string | null> => {
+        console.log('updating fonder image')
+        setIsUploadingFounder(true);
+        try {
+            const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
+            const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", uploadPreset!);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("founder image", data.secure_url)
+                setFounder((prev) => ({
+                    ...prev,
+                    photo: data.secure_url
+                }))
+                toast.success('Image added successfully');
+                return data.secure_url;
+            } else {
+                toast.error('Image upload failed');
+                return null;
+            }
+        } catch (error) {
+            toast.error('Image upload failed');
+            return null;
+        } finally {
+            setIsUploadingFounder(false);
+        }
+    };
+
 
     const uploadToCloudinary = async (file: File) => {
-
+        console.log('updating start up image')
         setIsUploading(true)
 
         try {
@@ -285,7 +325,11 @@ export default function CreateStartUpPage() {
             const data = await response.json();
 
             if (response.ok) {
-                console.log('Founder image URL:', data.secure_url);
+                console.log('startup image URL:', data.secure_url);
+                setFormData((prev) => ({
+                    ...prev,
+                    logo: data.secure_url
+                }))
                 toast.success('image updated succcessfully')
                 return data.secure_url
             } else {
@@ -300,39 +344,6 @@ export default function CreateStartUpPage() {
         }
     };
 
-
-    const uploadFounderImage = async (file: File): Promise<string | null> => {
-        setIsUploadingFounder(true);
-        try {
-            const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
-            const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;
-
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", uploadPreset!);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log(data.secure_url)
-                toast.success('Image added successfully');
-                return data.secure_url;
-            } else {
-                toast.error('Image upload failed');
-                return null;
-            }
-        } catch (error) {
-            toast.error('Image upload failed');
-            return null;
-        } finally {
-            setIsUploadingFounder(false);
-        }
-    };
 
 
     // Validate individual field
@@ -419,30 +430,6 @@ export default function CreateStartUpPage() {
         }
     };
 
-    // const handleFileUpload = (field: keyof startupDto, file: File) => {
-    //     const reader = new FileReader();
-    //     reader.onloadend = () => {
-    //         const result = reader.result as string;
-    //         setFormData(prev => ({
-    //             ...prev,
-    //             [field]: result
-    //         }));
-    //         validateField(field, result);
-    //     };
-    //     reader.readAsDataURL(file);
-    // };
-
-    // const handleFounderFileUpload = (field: keyof FounderInterface, file: File) => {
-    //     const reader = new FileReader();
-    //     reader.onloadend = () => {
-    //         setFounder(prev => ({
-    //             ...prev,
-    //             [field]: reader.result as string
-    //         }));
-    //     };
-    //     reader.readAsDataURL(file);
-    // };
-
     const handleDateChange = (date: Date | undefined) => {
         setDate(date);
         if (date) {
@@ -455,6 +442,7 @@ export default function CreateStartUpPage() {
         }
     };
 
+    console.log("this is founder image", founder.photo)
 
     const getFormValue = (field: keyof startupDto): string => {
         const value = formdata[field];
@@ -478,10 +466,10 @@ export default function CreateStartUpPage() {
 
     const handleAddFounder = async () => {
 
-        if (!founder.photo) {
-            toast.error('Please upload a founder photo');
-            return;
-        }
+        // if (!founder.photo) {
+        //     toast.error('Please upload a founder photo');
+        //     return;
+        // }
 
         const isValid = await validateFounderForm(founder);
         if (isValid) {
@@ -505,17 +493,20 @@ export default function CreateStartUpPage() {
 
         if (isValid) {
             try {
-                // Your submission logic here
-                console.log('Form submitted:', formdata);
+                await startUpService.postStartUp(formdata)
                 toast.success('Startup created successfully!');
-                // router.push('/success'); // or wherever you want to redirect
-            } catch (error) {
-                toast.error('Failed to create startup. Please try again.');
+                setFormData(startupValue)
+                router.push('/admin/dashboard/start-ups');
+            } catch (error: any) {
+                const resError = error.response?.data?.message || 'Network Error'
+                toast.error(resError);
+                console.log(error)
+            } finally {
+                setIsSubmitting(false);
             }
         } else {
             toast.error('Please fix all errors before submitting');
         }
-
         setIsSubmitting(false);
     };
 
@@ -589,7 +580,7 @@ export default function CreateStartUpPage() {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                        ) : item.type === 'photo' ? (
+                                        ) : item.type === 'image' ? (
                                             <>
                                                 <FileUploader
                                                     accept="image/*"
@@ -597,11 +588,7 @@ export default function CreateStartUpPage() {
                                                     onDrop={async (files) => {
                                                         const file = files[0];
                                                         if (file) {
-                                                            const startUrl = await uploadToCloudinary(file as any);
-                                                            setFormData((prev) => ({
-                                                                ...prev,
-                                                                logo: startUrl
-                                                            }))
+                                                            await uploadToCloudinary(file as any);
                                                         }
                                                     }}
                                                 />
@@ -687,120 +674,29 @@ export default function CreateStartUpPage() {
                                 )}
 
                                 <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
-                                    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                                        <DialogTrigger>
-                                            <div className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]">
-                                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
-                                                    Add founders ({formdata.founders.length})
-                                                </p>
-                                            </div>
-                                        </DialogTrigger>
-                                        <DialogContent className="">
-                                            <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
-                                                <DialogTitle className="text-[20px] font-bold text-[#344054]">
-                                                    <p>Add Founder</p>
-                                                    <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                                                        {isUploadingFounder ? (
-                                                            <div className="flex flex-col items-center">
-                                                                <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
-                                                                <p className="text-xs text-gray-500 mt-1">Uploading...</p>
-                                                            </div>
-                                                        ) : founder.photo && founder.photo.trim() !== "" ? (
-                                                            <img
-                                                                src={founder.photo}
-                                                                alt="founder preview"
-                                                                className="w-full h-full object-cover rounded-lg"
-                                                            />
-                                                        ) : (
-                                                            <p className="text-sm text-gray-500 text-center px-2">No picture uploaded yet</p>
-                                                        )}
-                                                    </div>
-                                                </DialogTitle>
-                                                <div className="w-full grid grid-cols-1 gap-2">
-                                                    {FoundersData.map((item, index) => (
-                                                        <div key={index} className="gap-1.5 mb-3 sm:mb-3 lg:mb-4">
-                                                            <Label htmlFor={item.name} className="">
-                                                                {item.label}
-                                                            </Label>
-
-                                                            {item.type === 'photo' ? (
-                                                                <>
-                                                                    <FileUploader
-                                                                        accept="image/*"
-                                                                        maxSize={500 * 1024}
-                                                                        onDrop={async (files) => {
-                                                                            const file = files[0];
-                                                                            if (file) {
-                                                                                const url = await uploadFounderImage(file as any);
-                                                                                if (url) {
-                                                                                    setFounder(prev => ({
-                                                                                        ...prev,
-                                                                                        photo: url
-                                                                                    }));
-                                                                                }
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                    {founderErrors[item.name] && (
-                                                                        <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
-                                                                    )}
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Input
-                                                                        type={item.type}
-                                                                        id={item.name}
-                                                                        name={item.name}
-                                                                        value={getFounderFormValue(item.name as keyof FounderInterface)}
-                                                                        onChange={(e) => onChangeFounderHandler(item.name as keyof FounderInterface, e.target.value)}
-                                                                        placeholder={item.placeholder}
-                                                                        className={cn(
-                                                                            "w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal",
-                                                                            founderErrors[item.name] && "border-red-500"
-                                                                        )}
-                                                                    />
-                                                                    {founderErrors[item.name] && (
-                                                                        <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleAddFounder}
-                                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
-                                                    >
-                                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
-                                                            {formdata.founders.length > 0 ? 'Add More' : 'Add'}
-                                                        </p>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setOpenDialog(false)
-                                                            setFounder(FoundersDto)
-                                                        }}
-                                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
-                                                    >
-                                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
-                                                            {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
-                                                        </p>
-                                                    </button>
-                                                </div>
-                                            </DialogHeader>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <button
+                                        type="button"
+                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
+                                        onClick={() => setOpenDialog(true)}
+                                    >
+                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                            Add founders ({formdata.founders.length})
+                                        </p>
+                                    </button>
                                     <button
                                         type="submit"
                                         disabled={formdata.founders.length < 1 || isSubmitting}
                                         className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
-                                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px] flex items-center gap-2">
+                                            {isSubmitting ? (
+                                                <>
+                                                    <LoaderCircle className="animate-spin" />
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                'Submit'
+                                            )}
                                         </p>
                                     </button>
                                 </div>
@@ -809,6 +705,107 @@ export default function CreateStartUpPage() {
                     </div>
                 </section>
             </main >
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogContent className="">
+                    <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
+                        <DialogTitle className="text-[20px] font-bold text-[#344054]">
+                            <p>Add Founder</p>
+                            <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                                {isUploadingFounder && (
+                                    <div className="flex flex-col items-center">
+                                        <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
+                                        <p className="text-xs text-gray-500 mt-1">Uploading...</p>
+                                    </div>
+                                )}
+
+                                {!isUploadingFounder && founder.photo === "" && (
+                                    <p className="text-sm text-gray-500">No photo uploaded yet</p>
+                                )}
+
+                                {!isUploadingFounder && founder.photo !== "" && (
+                                    <img
+                                        src={founder.photo}
+                                        alt="founder photo"
+                                        className="object-contain rounded-lg w-full h-full"
+                                        width={100}
+                                        height={100}
+                                    />
+                                )}
+                            </div>
+                        </DialogTitle>
+                        <div className="w-full grid grid-cols-1 gap-2">
+                            {FoundersData.map((item, index) => (
+                                <div key={index} className="gap-1.5 mb-3 sm:mb-3 lg:mb-4">
+                                    <Label htmlFor={item.name} className="">
+                                        {item.label}
+                                    </Label>
+
+                                    {item.type === 'photo' ? (
+                                        <>
+                                            <Uploader
+                                                accept="image/*"
+                                                maxSize={5 * 1024 * 1024}
+                                                onDrop={async (files) => {
+                                                    const file = files[0];
+                                                    if (file) {
+                                                        console.log('Uploading founder file:', file.name, file.size); // Debug log
+                                                        await uploadFounderImage(file);
+                                                    }
+                                                }}
+                                            />
+                                            {founderErrors[item.name] && (
+                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Input
+                                                type={item.type}
+                                                id={item.name}
+                                                name={item.name}
+                                                value={getFounderFormValue(item.name as keyof FounderInterface)}
+                                                onChange={(e) => onChangeFounderHandler(item.name as keyof FounderInterface, e.target.value)}
+                                                placeholder={item.placeholder}
+                                                className={cn(
+                                                    "w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal",
+                                                    founderErrors[item.name] && "border-red-500"
+                                                )}
+                                            />
+                                            {founderErrors[item.name] && (
+                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
+                            <button
+                                type="button"
+                                onClick={handleAddFounder}
+                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
+                            >
+                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                    {formdata.founders.length > 0 ? 'Add More' : 'Add'}
+                                </p>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setOpenDialog(false)
+                                    setFounder(FoundersDto)
+                                }}
+                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
+                            >
+                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
+                                    {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
+                                </p>
+                            </button>
+                        </div>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
