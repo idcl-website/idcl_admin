@@ -39,7 +39,7 @@ import { startupSchema, founderSchema } from "@/validation/startup";
 import { LoaderCircle } from 'lucide-react'
 import { startUpService } from "@/services/startup";
 
-type FounderInterface = {
+export type FounderInterface = {
     name: string,
     position: string,
     linkedin: string,
@@ -60,13 +60,15 @@ const FoundersDto = {
 export interface startupDto {
     logo: string,
     name: string,
+    industry: string,
     location: string,
     date: string,
     track: string,
-    reach: number,
-    region: number,
-    size: number,
-    funds: number,
+    reach: string,
+    type: string,
+    region: string,
+    size: string,
+    funds: string,
     support: string,
     story: string,
     description: string,
@@ -77,12 +79,14 @@ const startupValue = {
     logo: "",
     name: "",
     location: "",
+    industry: '',
     date: "",
     track: "",
-    reach: 0,
-    region: 0,
-    size: 0,
-    funds: 0,
+    reach: '',
+    type: '',
+    region: '',
+    size: '',
+    funds: '',
     support: "",
     story: "",
     description: "",
@@ -157,6 +161,20 @@ const startUpData: FormField[] = [
         label: 'Funding Raised',
         name: 'funds',
         placeholder: 'what is the funds raised',
+        type: 'text',
+        full: false
+    },
+    {
+        label: 'Business Type',
+        name: 'type',
+        options: ['B2B', 'B2C', 'B2B2C', 'B2E', 'B2G', 'C2B', 'C2C', 'D2C', 'G2C', 'G2B'],
+        type: 'select',
+        full: false
+    },
+    {
+        label: 'Industry',
+        name: 'industry',
+        placeholder: 'specify industry',
         type: 'text',
         full: false
     },
@@ -248,14 +266,13 @@ export default function CreateStartUpPage() {
     const [founderErrors, setFounderErrors] = useState<Record<string, string>>({});
 
     const onChangeHandler = (field: keyof startupDto, value: any) => {
-        const newValue = field === 'size' || field === 'funds' || field === 'region' || field === 'reach' ?
-            (value === '' ? 0 : Number(value)) : value;
+        const processedValue = (field === 'type' && value === "") ? undefined : value;
         setFormData(prev => ({
             ...prev,
-            [field]: newValue
+            [field]: processedValue
         }));
 
-        validateField(field, newValue);
+        validateField(field, processedValue);
     };
 
     const onChangeFounderHandler = (field: keyof FounderInterface, value: any) => {
@@ -442,14 +459,10 @@ export default function CreateStartUpPage() {
         }
     };
 
-    console.log("this is founder image", founder.photo)
+    console.log("this is the form infos", formdata)
 
     const getFormValue = (field: keyof startupDto): string => {
         const value = formdata[field];
-
-        if (field === 'size' || field === 'funds') {
-            return value.toString();
-        }
         if (Array.isArray(value)) {
             return ''; // Return empty string for arrays
         }
@@ -496,6 +509,7 @@ export default function CreateStartUpPage() {
                 await startUpService.postStartUp(formdata)
                 toast.success('Startup created successfully!');
                 setFormData(startupValue)
+                setFounder(FoundersDto)
                 router.push('/admin/dashboard/start-ups');
             } catch (error: any) {
                 const resError = error.response?.data?.message || 'Network Error'
@@ -568,18 +582,37 @@ export default function CreateStartUpPage() {
                                         </Label>
 
                                         {item.type === 'select' ? (
-                                            <Select>
-                                                <SelectTrigger className="w-full text-[14px] sm:text-[15px] lg:text-[16px]">
-                                                    <SelectValue placeholder={item.placeholder} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {item.options?.map((option, i) => (
-                                                        <SelectItem key={i} value={option.toLowerCase().replace(' ', '-')}>
-                                                            {option}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <>
+                                                <Select
+                                                    onValueChange={(value) => {
+                                                        onChangeHandler(item.name as keyof startupDto, value === "" ? undefined : value);
+                                                    }}
+                                                    value={formdata.type || ""}
+                                                >
+                                                    <SelectTrigger className="w-full text-[14px] sm:text-[15px] lg:text-[16px] border border-[#D0D5DD]">
+                                                        <SelectValue placeholder="Select business type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent
+                                                        className="rounded-[16px] border border-[#D0D5DD] bg-[#e6efff] w-[var(--radix-select-trigger-width)] min-w-[120px]"
+                                                        position="popper"
+                                                        align="end"
+                                                    >
+
+                                                        {item.options?.map((option, i) => (
+                                                            <SelectItem
+                                                                key={i}
+                                                                value={option.toLowerCase().replace(' ', '-')}
+                                                                className="font-inter font-medium text-xs sm:text-sm md:text-[10px] focus:bg-[#D0D5DD]"
+                                                            >
+                                                                {option}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {item.type === 'select' && formErrors[item.name] && (
+                                                    <p className="text-red-500 text-sm mt-1">{formErrors[item.name]}</p>
+                                                )}
+                                            </>
                                         ) : item.type === 'image' ? (
                                             <>
                                                 <FileUploader

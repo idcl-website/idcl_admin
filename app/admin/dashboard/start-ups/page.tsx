@@ -18,6 +18,20 @@ import { useEffect, useState } from "react";
 import { startUpService } from "@/services/startup";
 import { toast, Toaster } from "sonner";
 
+export interface StartUpInterface {
+    id: string,
+    track: string,
+    reach: string,
+    logo: string,
+    date: string,
+    name: string,
+    story: string,
+    type: string,
+    isApproved: boolean,
+    industry: string,
+    region: string,
+}
+
 const startUpFilters = [
     {
         title: 'sort',
@@ -121,23 +135,25 @@ const startUps = [
 export default function Dashboardpage() {
     const router = useRouter()
     const [isFetching, setIsFetching] = useState(true);
+    const [startups, setStartups] = useState<StartUpInterface[]>([]);
 
 
-    // useEffect(() => {
-    //     const getStarUps = async () => {
-    //         try {
-    //             const data = await startUpService.getAllStarups();
-    //             console.log(data)
-    //         } catch (error: any) {
-    //             const resError = error.response?.data?.message || "An Internal Server Error"
-    //             toast.error(resError)
-    //         } finally {
-    //             setIsFetching(false)
-    //         }
-    //     }
+    useEffect(() => {
+        const getStarUps = async () => {
+            try {
+                const data = await startUpService.getAllStarups();
+                console.log(data)
+                setStartups(data)
+            } catch (error: any) {
+                const resError = error.response?.data?.message || "An Internal Server Error"
+                toast.error(resError)
+            } finally {
+                setIsFetching(false)
+            }
+        }
 
-    //     getStarUps();
-    // }, [])
+        getStarUps();
+    }, [])
 
 
     if (isFetching) return <StarupSkelenton />
@@ -211,8 +227,8 @@ export default function Dashboardpage() {
 
                 {/* EXPLORE STARTUPS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[39px]">
-                    {startUps.map((item, index) => (
-                        <ExploreStartUp key={index} {...item} id={index + 1} />
+                    {startups.map((item, index) => (
+                        <ExploreStartUp key={index} {...item} setStartups={setStartups} />
                     ))}
                 </div>
             </div>

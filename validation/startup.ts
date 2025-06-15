@@ -17,12 +17,20 @@ export const startupSchema = yup.object().shape({
     location: yup.string().required('Location is required').min(2, 'Location must be at least 2 characters'),
     date: yup.date().required('Date founded is required').max(new Date(), 'Date cannot be in the future'),
     track: yup.string().required('Program track is required'),
-    reach: yup.number().required('Patients reached is required').integer('Must be positive'),
-    region: yup.number().required('Regions covered is required').integer('Must be positive'),
-    size: yup.number().required('Team size is required').positive('Must be positive').integer('Must be a whole number'),
-    funds: yup.number().required('Funding raised is required').positive('Must be positive'),
-    support: yup.string().required('Support received is required').min(10, 'Must be at least 10 characters'),
-    story: yup.string().required('Founder story is required').min(10, 'Must be at least 10 characters'),
-    description: yup.string().required('Description is required').min(20, 'Must be at least 20 characters'),
+    reach: yup.string().required('Patients reached is required').min(2, 'patients reached must be at least 2 characters'),
+    region: yup.string().required('Regions covered is required').min(2, 'Region reached must be more than 2 characters'),
+    size: yup.string().required('Team size is required').min(1, 'Must be at least one team member'),
+    funds: yup.string().required('Funding raised is required').min(2, 'Funds must be at least tw0 figures'),
+    support: yup.string().required('Support received is required').min(5, 'Must be at least 5 characters'),
+    story: yup.string().required('Founder story is required').min(5, 'Must be at least 5 characters'),
+    description: yup.string().required('Description is required').min(10, 'Must be at least 10 characters'),
+    industry: yup.string().required('Industry is required').min(3, 'Must be at least 3 characters'),
+    type: yup.string()
+        .required('Business type is required')
+        .test(
+            'not-empty',
+            'Business type is required',
+            (value) => value !== undefined && value !== null && value !== ''
+        ),
     founders: yup.array().of(founderSchema).min(1, 'At least one founder is required'),
 });
