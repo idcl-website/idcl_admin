@@ -35,19 +35,19 @@ export interface StartUpInterface {
 const startUpFilters = [
     {
         title: 'sort',
-        options: ['Show All', 'Approved', 'Pending', 'Rejected'],
+        options: ['Show All', 'Approved', 'Pending',],
         width: 163,
         selectWidth: 106
     },
     {
         title: 'type',
-        options: ['B2B', 'B2C', 'B2B2C', 'B2E', 'B2G', 'C2B', 'C2C', 'D2C', 'G2C', 'G2B'],
+        options: ['Show All', 'B2B', 'B2C', 'B2B2C', 'B2E', 'B2G', 'C2B', 'C2C', 'D2C', 'G2C', 'G2B'],
         width: 182,
         selectWidth: 106
     },
     {
         title: 'batch',
-        options: [2025, 2026, 2027, 2028],
+        options: ['Show All', 2024, 2025, 2026, 2027, 2028],
         width: 127,
         selectWidth: 106
     },
@@ -136,6 +136,59 @@ export default function Dashboardpage() {
     const router = useRouter()
     const [isFetching, setIsFetching] = useState(true);
     const [startups, setStartups] = useState<StartUpInterface[]>([]);
+    const [filteredStartups, setFilteredStartups] = useState<StartUpInterface[]>([]);
+    const [filters, setFilters] = useState({
+        sort: 'Show All',
+        type: 'Show All',
+        batch: 'Show All'
+    });
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Handle filter changes
+    const handleFilterChange = (filterName: string, value: string) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterName]: value
+        }));
+    };
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value.toLocaleLowerCase());
+    };
+
+    useEffect(() => {
+        let results = [...startups];
+
+        // Apply search filter
+        if (searchQuery) {
+            results = results.filter(startup =>
+                startup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                startup.story.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                startup.industry.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Apply sort filter
+        if (filters.sort !== 'Show All') {
+            results = results.filter(startup => {
+                if (filters.sort === 'Approved') return startup.isApproved;
+                if (filters.sort === 'Pending') return !startup.isApproved;
+            });
+        }
+
+        // Apply type filter
+        if (filters.type !== 'Show All') {
+            results = results.filter(startup => startup.type === filters.type);
+        }
+
+        // Apply batch filter (assuming date contains year)
+        if (filters.batch !== 'Show All') {
+            results = results.filter(startup => startup.date.toString() === filters.batch);
+        }
+
+        setFilteredStartups(results);
+    }, [startups, searchQuery, filters]);
+
 
 
     useEffect(() => {
@@ -169,6 +222,8 @@ export default function Dashboardpage() {
                                 <Input
                                     placeholder="Search"
                                     className="pl-10 rounded-[16px] w-full bg-white"
+                                    value={searchQuery}
+                                    onChange={handleSearch}
                                 />
                             </div>
 
@@ -180,17 +235,14 @@ export default function Dashboardpage() {
                                             {filter.title}
                                         </p>
 
-                                        <Select>
+                                        <Select
+                                            value={filters[filter.title as keyof typeof filters]}
+                                            onValueChange={(value) => handleFilterChange(filter.title, value)}
+                                        >
                                             <SelectTrigger
                                                 className={`w-full md:w-[${filter.selectWidth}px] h-[25px]! rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]`}
                                             >
-                                                <SelectValue
-                                                    placeholder={
-                                                        <span className="font-inter font-normal text-xs sm:text-sm md:text-[10px] text-[#667085] leading-[14px] truncate">
-                                                            {filter.options[0]}
-                                                        </span>
-                                                    }
-                                                />
+                                                <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent
                                                 className="rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
@@ -227,7 +279,7 @@ export default function Dashboardpage() {
 
                 {/* EXPLORE STARTUPS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[39px]">
-                    {startups.map((item, index) => (
+                    {filteredStartups.map((item, index) => (
                         <ExploreStartUp key={index} {...item} setStartups={setStartups} />
                     ))}
                 </div>

@@ -15,6 +15,7 @@ export const startUpService = {
     },
 
     updateApprovalStatus: async (id: string) => {
+        console.log(id)
         const response = await axiosInstance.put(`/admin/startups`, { id })
         return response.data;
     }
