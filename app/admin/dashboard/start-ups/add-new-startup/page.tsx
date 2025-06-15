@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import back from "@/assets/icons/back.svg"
 import { useRouter } from "next/navigation";
-import * as yup from 'yup'; // Added missing import
+import * as yup from 'yup';
 import {
     Popover,
     PopoverContent,
@@ -38,6 +38,7 @@ import { toast, Toaster } from 'sonner'
 import { startupSchema, founderSchema } from "@/validation/startup";
 import { LoaderCircle } from 'lucide-react'
 import { startUpService } from "@/services/startup";
+import FoundedDialog from "@/components/dashboard/founder-dialog";
 
 export type FounderInterface = {
     name: string,
@@ -738,107 +739,7 @@ export default function CreateStartUpPage() {
                     </div>
                 </section>
             </main >
-            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogContent className="">
-                    <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
-                        <DialogTitle className="text-[20px] font-bold text-[#344054]">
-                            <p>Add Founder</p>
-                            <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                                {isUploadingFounder && (
-                                    <div className="flex flex-col items-center">
-                                        <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
-                                        <p className="text-xs text-gray-500 mt-1">Uploading...</p>
-                                    </div>
-                                )}
-
-                                {!isUploadingFounder && founder.photo === "" && (
-                                    <p className="text-sm text-gray-500">No photo uploaded yet</p>
-                                )}
-
-                                {!isUploadingFounder && founder.photo !== "" && (
-                                    <img
-                                        src={founder.photo}
-                                        alt="founder photo"
-                                        className="object-contain rounded-lg w-full h-full"
-                                        width={100}
-                                        height={100}
-                                    />
-                                )}
-                            </div>
-                        </DialogTitle>
-                        <div className="w-full grid grid-cols-1 gap-2">
-                            {FoundersData.map((item, index) => (
-                                <div key={index} className="gap-1.5 mb-3 sm:mb-3 lg:mb-4">
-                                    <Label htmlFor={item.name} className="">
-                                        {item.label}
-                                    </Label>
-
-                                    {item.type === 'photo' ? (
-                                        <>
-                                            <Uploader
-                                                accept="image/*"
-                                                maxSize={5 * 1024 * 1024}
-                                                onDrop={async (files) => {
-                                                    const file = files[0];
-                                                    if (file) {
-                                                        console.log('Uploading founder file:', file.name, file.size); // Debug log
-                                                        await uploadFounderImage(file);
-                                                    }
-                                                }}
-                                            />
-                                            {founderErrors[item.name] && (
-                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Input
-                                                type={item.type}
-                                                id={item.name}
-                                                name={item.name}
-                                                value={getFounderFormValue(item.name as keyof FounderInterface)}
-                                                onChange={(e) => onChangeFounderHandler(item.name as keyof FounderInterface, e.target.value)}
-                                                placeholder={item.placeholder}
-                                                className={cn(
-                                                    "w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal",
-                                                    founderErrors[item.name] && "border-red-500"
-                                                )}
-                                            />
-                                            {founderErrors[item.name] && (
-                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
-                            <button
-                                type="button"
-                                onClick={handleAddFounder}
-                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
-                            >
-                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
-                                    {formdata.founders.length > 0 ? 'Add More' : 'Add'}
-                                </p>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setOpenDialog(false)
-                                    setFounder(FoundersDto)
-                                }}
-                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
-                            >
-                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
-                                    {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
-                                </p>
-                            </button>
-                        </div>
-                    </DialogHeader>
-                </DialogContent>
-            </Dialog>
+            <FoundedDialog openDialog={openDialog} setOpenDialog={setOpenDialog} />
         </>
     )
 }
