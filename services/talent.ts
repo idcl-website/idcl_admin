@@ -9,6 +9,12 @@ interface CreateTalent {
 export const TalentService = {
 
     createTalent: async (data: CreateTalent) => {
-        console.log(data)
+        const response = await axiosInstance.post('/admin/talent/create', data)
+        return response.data
+    },
+
+    getAllTalents: async () => {
+        const response = await axiosInstance.get('/admin/talent/all');
+        return response.data;
     }
 }

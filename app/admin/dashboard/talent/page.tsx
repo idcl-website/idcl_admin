@@ -21,6 +21,10 @@ import talent from '@/assets/images/talent.png'
 import Image from "next/image";
 import more from '@/assets/icons/more.svg'
 import { useRouter } from "next/navigation";
+import TalentPageSkeleton from "@/skeletons/talent";
+import { useEffect, useState } from "react";
+import { TalentService } from "@/services/talent";
+import { toast } from "sonner";
 
 const TalentFilters = [
     {
@@ -37,89 +41,41 @@ const TalentFilters = [
     },
 ]
 
-const TalentData = [
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
-    {
-        image: talent,
-        name: 'Pedro Macejkovic',
-        email: 'Pedro@gmail.com',
-        track: 'Developer',
-        date: '11/6/2022'
-    },
 
-]
+interface TalentInterface {
+    id: string,
+    image: string,
+    track: string,
+    name: string,
+    email: string,
+    date: string
+}
 
 export default function TalentPage() {
+    const [isfetching, setIsFetching] = useState(true)
+    const [talents, setTalents] = useState<TalentInterface[]>([])
     const router = useRouter();
+
+
+    useEffect(() => {
+        const getAllTalents = async () => {
+            try {
+                const data = await TalentService.getAllTalents();
+                setTalents(data)
+            } catch (error: any) {
+                const resError = error.response?.data?.message || "Check your internet connection. Try again"
+                toast.error(resError)
+            } finally {
+                setIsFetching(false)
+            }
+        }
+
+        getAllTalents();
+    }, [])
+
+    if (isfetching) {
+        return <TalentPageSkeleton />
+    }
     return (
         <div className="space-y-6">
             <aside className="w-full flex gap-2 md:gap-[20px] items-center flex-col md:flex-row py-[6px] px-[12px] bg-white rounded-[10px]">
@@ -197,7 +153,13 @@ export default function TalentPage() {
                         <span className="font-inter text-[#fff] text-[11.626px] font-medium leading-[16px]">Add</span>
 
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="18" viewBox="0 0 17 18" fill="none">
-                            <path d="M8.47897 3.9248V13.6132M3.63477 8.76901H13.3232" stroke="white" stroke-width="1.38683" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M8.47897 3.9248V13.6132M3.63477 8.76901H13.3232"
+                                stroke="white"
+                                strokeWidth="1.38683"  // Changed from stroke-width
+                                strokeLinecap="round"   // Changed from stroke-linecap
+                                strokeLinejoin="round"  // Changed from stroke-linejoin
+                            />
                         </svg>
                     </button>
                 </div>
@@ -215,14 +177,14 @@ export default function TalentPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody className="bg-[#fff]">
-                            {[...Array(12)].map((_, index) => (
+                            {talents.map((talent, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="font-medium font-Inter text-[11px]">{index + 1}</TableCell>
-                                    <TableCell><Image src={talent} alt="talent" priority /></TableCell>
-                                    <TableCell className="text-[#101828] font-medium">Darla Schroeder</TableCell>
-                                    <TableCell className="text-[#667085]">Pedro@gmail.com</TableCell>
-                                    <TableCell className="text-[#667085]">Developer</TableCell>
-                                    <TableCell className="text-[#667085]">11/6/2022</TableCell>
+                                    <TableCell><Image src={talent.image} width={28} height={28} alt="talent" priority className="object-cover" /></TableCell>
+                                    <TableCell className="text-[#101828] font-medium">{talent.name}</TableCell>
+                                    <TableCell className="text-[#667085]">{talent.email}</TableCell>
+                                    <TableCell className="text-[#667085]">{talent.track}</TableCell>
+                                    <TableCell className="text-[#667085]">{talent.date}</TableCell>
                                     <TableCell className="text-right"><Image src={more} alt="more" priority /></TableCell>
                                 </TableRow>
                             ))}

@@ -38,6 +38,7 @@ export default function AddTalent() {
                 toast.success('Talent created')
                 formik.resetForm();
                 setImageFile(undefined)
+                router.push('/admin/dashboard/talent')
             } catch (error: any) {
                 console.error('Submission error:', error);
                 toast.error(error.response?.data?.message)
