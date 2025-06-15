@@ -25,17 +25,26 @@ import TalentPageSkeleton from "@/skeletons/talent";
 import { useEffect, useState } from "react";
 import { TalentService } from "@/services/talent";
 import { toast } from "sonner";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
 const TalentFilters = [
     {
         title: 'sort',
-        options: ['Show All', 'Approved', 'Pending', 'Rejected'],
+        options: ['all', 'Approved', 'Pending'],
         width: 163,
         selectWidth: 106
     },
     {
         title: 'batch',
-        options: [2025, 2026, 2027, 2028],
+        options: ['all', '2025', '2026', '2027', '2028'],
         width: 127,
         selectWidth: 62
     },
@@ -48,20 +57,37 @@ interface TalentInterface {
     track: string,
     name: string,
     email: string,
-    date: string
+    date: string,
+    isApproved: boolean,
+    fullYear: number
 }
 
 export default function TalentPage() {
-    const [isfetching, setIsFetching] = useState(true)
-    const [talents, setTalents] = useState<TalentInterface[]>([])
     const router = useRouter();
+    const [isfetching, setIsFetching] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [totalTalent, setTotalTalents] = useState(0)
+    const [talents, setTalents] = useState<TalentInterface[]>([])
+    const [filteredTalents, setFilteredTalents] = useState<TalentInterface[]>([])
+    const [searchQuery, setSearchQuery] = useState('')
+    const [filters, setfilters] = useState({
+        sort: 'all',
+        batch: 'all'
+    })
 
 
     useEffect(() => {
         const getAllTalents = async () => {
             try {
-                const data = await TalentService.getAllTalents();
-                setTalents(data)
+                const data = await TalentService.getAllTalents(currentPage);
+                console.log(data)
+                setFilteredTalents(data.talents)
+                setTalents(data.talents)
+                setHasMore(data.pagination.hasMore)
+                setTotalPages(data.pagination.totalPages)
+                setTotalTalents(data.pagination.total)
             } catch (error: any) {
                 const resError = error.response?.data?.message || "Check your internet connection. Try again"
                 toast.error(resError)
@@ -71,7 +97,43 @@ export default function TalentPage() {
         }
 
         getAllTalents();
-    }, [])
+    }, [currentPage])
+
+
+    useEffect(() => {
+
+        let results = [...talents]
+
+        if (searchQuery) {
+            results = results.filter((talent) => talent.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                talent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                talent.track.toLowerCase().includes(searchQuery.toLowerCase()))
+        }
+
+        if (filters.sort !== 'all') {
+            results = results.filter((talent) => {
+                if (filters.sort === 'Approved') return talent.isApproved
+                if (filters.sort === 'Pending') return !talent.isApproved
+                return true;
+            })
+        }
+
+        if (filters.batch !== 'all') {
+            results.filter((talent) => {
+                talent.date.toString() === filters.batch;
+            })
+        }
+
+        setFilteredTalents(results)
+
+    }, [searchQuery, filters])
+
+    const handleFilterChange = (filterType: string, value: string) => {
+        setfilters(prev => ({
+            ...prev,
+            [filterType]: value
+        }));
+    }
 
     if (isfetching) {
         return <TalentPageSkeleton />
@@ -84,6 +146,8 @@ export default function TalentPage() {
                     <Input
                         placeholder="Search"
                         className="pl-10 rounded-[16px] w-full bg-white"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
 
@@ -95,17 +159,14 @@ export default function TalentPage() {
                                 {filter.title}
                             </p>
 
-                            <Select>
+                            <Select
+                                value={filters[filter.title as keyof typeof filters]}
+                                onValueChange={(value) => handleFilterChange(filter.title, value)}
+                            >
                                 <SelectTrigger
                                     className={`w-full md:w-[${filter.selectWidth}px] h-[25px]! rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]`}
                                 >
-                                    <SelectValue
-                                        placeholder={
-                                            <span className="font-inter font-normal text-xs sm:text-sm md:text-[10px] text-[#667085] leading-[14px]">
-                                                {filter.options[0]}
-                                            </span>
-                                        }
-                                    />
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent
                                     className="rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
@@ -133,7 +194,7 @@ export default function TalentPage() {
                     <div>
                         <div className="flex items-center gap-[6.6px]">
                             <span className="text-[#101828] text-[16px] font-medium leading-[23px]">Talent Pool</span>
-                            <p className="bg-[#F7FAFF] rounded-[13px] text-[#005DFF] text-[9px] font-inter font-medium leading-[14px] py-1 px-2">10,000 Registered</p>
+                            <p className="bg-[#F7FAFF] rounded-[13px] text-[#005DFF] text-[9px] font-inter font-medium leading-[14px] py-1 px-2">{totalTalent}</p>
                         </div>
                         <p className="text-[#667085] text-[12px] font-normal leading-[16px]">Certified students from skill-up imo program</p>
                     </div>
@@ -177,7 +238,7 @@ export default function TalentPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody className="bg-[#fff]">
-                            {talents.map((talent, index) => (
+                            {filteredTalents.map((talent, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="font-medium font-Inter text-[11px]">{index + 1}</TableCell>
                                     <TableCell><Image src={talent.image} width={28} height={28} alt="talent" priority className="object-cover" /></TableCell>
@@ -190,6 +251,59 @@ export default function TalentPage() {
                             ))}
                         </TableBody>
                     </Table>
+                </div>
+                <div>
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setCurrentPage(prev => Math.max(prev - 1, 1));
+                                    }}
+                                    aria-disabled={currentPage === 1}
+                                    className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}
+                                />
+                            </PaginationItem>
+
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                const page = i + 1;
+                                return (
+                                    <PaginationItem key={page}>
+                                        <PaginationLink
+                                            href="#"
+                                            isActive={page === currentPage}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setCurrentPage(page);
+                                            }}
+                                        >
+                                            {page}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                );
+                            })}
+
+                            {totalPages > 5 && (
+                                <PaginationItem>
+                                    <PaginationEllipsis />
+                                </PaginationItem>
+                            )}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                                    }}
+                                    aria-disabled={currentPage === totalPages}
+                                    className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </div>
             </section>
         </div>

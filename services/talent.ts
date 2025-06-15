@@ -13,8 +13,12 @@ export const TalentService = {
         return response.data
     },
 
-    getAllTalents: async () => {
-        const response = await axiosInstance.get('/admin/talent/all');
+    getAllTalents: async (page = 1, limit = 15) => {
+        const response = await axiosInstance.get('/admin/talent/all', {
+            params: {
+                page, limit
+            }
+        });
         return response.data;
     }
 }
