@@ -1,10 +1,17 @@
 "use client"
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation";
 import StarupSkelenton from "@/skeletons/startup";
-
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 import {
     Select,
     SelectContent,
@@ -12,7 +19,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import Link from "next/link";
 import ExploreStartUp from "@/components/dashboard/startups";
 import { useEffect, useState } from "react";
 import { startUpService } from "@/services/startup";
@@ -51,85 +57,6 @@ const startUpFilters = [
         width: 127,
         selectWidth: 106
     },
-]
-
-
-const startUps = [
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-    {
-        startUpName: 'MediBridge',
-        ecosystem: 'HealthTech',
-        description: 'Bridging rural communities to healthcare via mobile clinics.',
-        story: 'Case study on how MediBridge has served 50,000+ patients across 12 underserved regions.'
-    },
-
-
-
 ]
 
 export default function Dashboardpage() {

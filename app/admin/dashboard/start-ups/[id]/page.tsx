@@ -8,6 +8,9 @@ import founder from "@/assets/images/founder.png"
 import logo from "@/assets/images/image.png"
 import back from "@/assets/icons/back.svg"
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { startUpService } from "@/services/startup";
 const founders = [
     {
         image: founder,
@@ -124,52 +127,6 @@ const founders = [
         ]
     },
 ]
-const ProfileData = [
-    'Stage',
-    'Location',
-    'Date Founded',
-    'Program Track',
-    'Patients Reached',
-    'Regions Covered',
-    'Team Size',
-    'Funding Raised',
-    'Support Received',
-] as const
-
-type ProfileDataKey =
-    | 'Stage'
-    | 'Location'
-    | 'Founded'
-    | 'Track'
-    | 'Reached'
-    | 'Covered'
-    | 'Size'
-    | 'Raised'
-    | 'Received';
-
-interface ProfileData {
-    Stage: string;
-    Location: string;
-    Founded: string;
-    Track: string;
-    Reached: string;
-    Covered: string;
-    Size: number;
-    Raised: string;
-    Received: string;
-}
-
-const profileData: ProfileData = {
-    Stage: 'Growth',
-    Location: 'Imo, Nigeria',
-    Founded: 'Founded 2024',
-    Track: 'Accelerator Cohort 2',
-    Reached: '50,000+',
-    Covered: '12 underserved rural areas',
-    Size: 18,
-    Raised: '$200,000 Seed Round',
-    Received: 'Mobile infrastructure, funding, public health mentorship'
-}
 
 const Crises = {
     Access: {
@@ -190,20 +147,53 @@ const Crises = {
 }
 
 export default function StartUpProfile() {
-    const router = useRouter()
-    const getDataKey = (label: typeof ProfileData[number]): ProfileDataKey => {
-        switch (label) {
-            case 'Date Founded': return 'Founded';
-            case 'Program Track': return 'Track';
-            case 'Patients Reached': return 'Reached';
-            case 'Regions Covered': return 'Covered';
-            case 'Team Size': return 'Size';
-            case 'Funding Raised': return 'Raised';
-            case 'Support Received': return 'Received';
-            default: return label as ProfileDataKey;
-        }
-    };
+    const { id } = useParams();
+    const router = useRouter();
+    const [startupProfile, setStartupProfile] = useState({
+        name: '',
+        industry: '',
+        date: '',
+        logo: '',
+        location: '',
+        founded: '',
+        track: '',
+        reach: '',
+        region: '',
+        size: '',
+        funds: '',
+        support: '',
+        founderstory: ''
+    })
 
+
+    useEffect(() => {
+        const startup = async () => {
+            try {
+                const data = await startUpService.getStartUp(id as string)
+                console.log(data)
+                setStartupProfile({
+                    name: data.name,
+                    industry: data.industry,
+                    date: data.date,
+                    logo: data.logo,
+                    location: data.location,
+                    founded: data.date,
+                    track: data.track,
+                    reach: data.reach,
+                    region: data.region,
+                    size: data.size,
+                    funds: data.funds,
+                    support: data.support,
+                    founderstory: data.story
+                })
+            } catch (error: any) {
+                console.error(error.response?.data?.message || "An error occurred. Retry")
+            } finally {
+
+            }
+        }
+        startup();
+    }, [id])
     return (
         <section className="flex flex-col md:flex-row items-start gap-4 lg:gap-[25px]">
 
@@ -220,29 +210,89 @@ export default function StartUpProfile() {
 
             <main className="flex flex-col items-start gap-4 lg:gap-[26px] w-full lg:w-[643px]">
                 <div className="flex flex-col py-4 lg:py-[20px] px-4 lg:px-[30px] items-start gap-2 lg:gap-[11px] self-stretch rounded-[10px] bg-[#fff] border border-[#E4E4E4]">
-                    <h1 className="font-satoshi font-bold text-xl lg:text-[26px] self-stretch text-[#475467] leading-tight lg:leading-[26px]">MediBridge</h1>
+                    <h1 className="font-satoshi font-bold text-xl lg:text-[26px] self-stretch text-[#475467] leading-tight lg:leading-[26px] capitalize">{startupProfile.name}</h1>
                     <div className="flex w-[74px] py-1 lg:py-[4px] px-1.5 lg:px-[6px] items-center justify-center gap-2 lg:gap-[10px] bg-[#1E1E1E] rounded-[8px]">
-                        <p className="text-[#F5F9FF] font-satoshi font-bold text-xs lg:text-[12px] leading-4 lg:leading-[16px]">
-                            HealthTech
+                        <p className="text-[#F5F9FF] font-satoshi font-bold text-xs lg:text-[12px] leading-4 lg:leading-[16px] capitalize">
+                            {startupProfile.industry}
                         </p>
                     </div>
                 </div>
 
 
                 <div className="flex p-4 lg:p-[20px] flex-col items-center justify-center bg-[#fff] gap-2 lg:gap-[6px] self-stretch rounded-[10px] border border-[#E4E4E4]">
-                    {ProfileData.map((item, index) => {
-                        const dataKey = getDataKey(item);
-                        return (
-                            <div key={index} className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                                <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                                    <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">{item}</p>
-                                </div>
-                                <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0]">
-                                    <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">{profileData[dataKey]}</p>
-                                </div>
-                            </div>
-                        );
-                    })}
+
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Stage</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">Growth</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Location</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.location}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Date Founded</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{`founded ${startupProfile.date}`}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Program Track</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.track}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Audience Reached</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.reach}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Regions Covered</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.region}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Team Size</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.size}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Funding Raised</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.funds}</p>
+                        </div>
+                    </div>
+                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Support Received</p>
+                        </div>
+                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
+                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.support}</p>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -251,7 +301,7 @@ export default function StartUpProfile() {
                         Founders Story
                     </h1>
                     <p className="font-satoshi font-normal text-base lg:text-[18px] leading-6 lg:leading-[27px] text-[#475467] self-stretch">
-                        Dr. Halima Yusuf, a rural health advocate, founded MediBridge after witnessing a woman lose her child due to lack of access to emergency care. With limited hospitals and poor transport infrastructure in rural Nigeria, she envisioned mobile clinics powered by telemedicine and local health agents. MediBridge was born to make healthcare accessible—wherever it's needed most.
+                        {startupProfile.founderstory}
                     </p>
                 </div>
 
@@ -307,14 +357,11 @@ export default function StartUpProfile() {
                     </div>
                 </div>
             </main>
-            <div className="">
-                <Image
-                    src={logo}
+            <div className="w-[70px] h-[70px] md:w-[100px] md:h-[100px] bg-white p-4 flex items-center justify-center rounded-full border border-[#005DFF] ">
+                <img
+                    src={startupProfile.logo}
                     alt="Startup Logo"
-                    width={64}
-                    height={64}
-                    className="object-cover"
-                    priority
+                    className="object-contain"
                 />
             </div>
         </section>
