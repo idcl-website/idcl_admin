@@ -44,7 +44,7 @@ const TalentFilters = [
     },
     {
         title: 'batch',
-        options: ['all', '2025', '2026', '2027', '2028'],
+        options: ['all', 2025, 2026, 2027, 2028],
         width: 127,
         selectWidth: 62
     },
@@ -78,11 +78,12 @@ export default function TalentPage() {
     })
 
 
+
     useEffect(() => {
         const getAllTalents = async () => {
             try {
                 const data = await TalentService.getAllTalents(currentPage);
-                console.log(data)
+                console.log(data.talents)
                 setFilteredTalents(data.talents)
                 setTalents(data.talents)
                 setHasMore(data.pagination.hasMore)
@@ -119,8 +120,10 @@ export default function TalentPage() {
         }
 
         if (filters.batch !== 'all') {
-            results.filter((talent) => {
-                talent.date.toString() === filters.batch;
+            results = results.filter((talent) => {
+                // console.log(talent.date)
+                // console.log(filters.batch)
+                return (talent.fullYear.toString() === filters.batch);
             })
         }
 
