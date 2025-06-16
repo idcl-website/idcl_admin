@@ -1,13 +1,13 @@
 import axios from "axios";
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-console.log("connection backend",API_URL)
+console.log(API_URL)
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const axiosInstance = axios.create({
@@ -21,9 +21,12 @@ export const axiosInstance = axios.create({
 
 // Add token to all requests
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('admin_jwt');
+    if (token) {
+      console.log('Attaching token:', token)
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });

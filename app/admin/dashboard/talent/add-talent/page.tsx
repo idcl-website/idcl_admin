@@ -92,7 +92,7 @@ export default function AddTalent() {
                                         try {
                                             setIsUploading(true)
                                             const ImageUrl = await uploadToCloudinary(file)
-
+                                            console.log(ImageUrl)
                                             if (ImageUrl) setImageFile(ImageUrl)
                                         } catch (error: any) {
                                             console.error(error.response?.data?.message)

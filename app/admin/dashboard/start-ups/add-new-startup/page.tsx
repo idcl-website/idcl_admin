@@ -38,7 +38,7 @@ import { toast, Toaster } from 'sonner'
 import { startupSchema, founderSchema } from "@/validation/startup";
 import { LoaderCircle } from 'lucide-react'
 import { startUpService } from "@/services/startup";
-import FoundedDialog from "@/components/dashboard/founder-dialog";
+import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
 
 export type FounderInterface = {
     name: string,
@@ -261,8 +261,8 @@ export default function CreateStartUpPage() {
     const [formdata, setFormData] = useState<startupDto>(startupValue);
     const [founder, setFounder] = useState<FounderInterface>(FoundersDto)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const [isUploading, setIsUploading] = useState<boolean>(false)
-    const [isUploadingFounder, setIsUploadingFounder] = useState<boolean>(false)
+    const [isUploadingStartupImage, setIsUploadingStartupImage] = useState<boolean>(false)
+    const [isUploadingFounderImage, setIsUploadingFounderImage] = useState<boolean>(false)
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [founderErrors, setFounderErrors] = useState<Record<string, string>>({});
 
@@ -283,85 +283,6 @@ export default function CreateStartUpPage() {
         }))
         validateFounderField(field, value);
     }
-
-    const uploadFounderImage = async (file: File): Promise<string | null> => {
-        console.log('updating fonder image')
-        setIsUploadingFounder(true);
-        try {
-            const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
-            const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;
-
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", uploadPreset!);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log("founder image", data.secure_url)
-                setFounder((prev) => ({
-                    ...prev,
-                    photo: data.secure_url
-                }))
-                toast.success('Image added successfully');
-                return data.secure_url;
-            } else {
-                toast.error('Image upload failed');
-                return null;
-            }
-        } catch (error) {
-            toast.error('Image upload failed');
-            return null;
-        } finally {
-            setIsUploadingFounder(false);
-        }
-    };
-
-
-    const uploadToCloudinary = async (file: File) => {
-        console.log('updating start up image')
-        setIsUploading(true)
-
-        try {
-            const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
-            const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;
-
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", uploadPreset!);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log('startup image URL:', data.secure_url);
-                setFormData((prev) => ({
-                    ...prev,
-                    logo: data.secure_url
-                }))
-                toast.success('image updated succcessfully')
-                return data.secure_url
-            } else {
-                toast.error('Logo upload failed')
-                return null
-            }
-        } catch (error) {
-            toast.error('Logo upload failed')
-            return null
-        } finally {
-            setIsUploading(false)
-        }
-    };
-
 
 
     // Validate individual field
@@ -480,10 +401,10 @@ export default function CreateStartUpPage() {
 
     const handleAddFounder = async () => {
 
-        // if (!founder.photo) {
-        //     toast.error('Please upload a founder photo');
-        //     return;
-        // }
+        if (!founder.photo) {
+            toast.error('Please upload a founder photo');
+            return;
+        }
 
         const isValid = await validateFounderForm(founder);
         if (isValid) {
@@ -545,18 +466,18 @@ export default function CreateStartUpPage() {
                                 Start-Up Details
                             </h1>
                             <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                                {isUploading && (
+                                {isUploadingStartupImage && (
                                     <div className="flex flex-col items-center">
                                         <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
                                         <p className="text-xs text-gray-500 mt-1">Uploading...</p>
                                     </div>
                                 )}
 
-                                {!isUploading && formdata.logo === "" && (
+                                {!isUploadingStartupImage && formdata.logo === "" && (
                                     <p className="text-sm text-gray-500">No logo uploaded yet</p>
                                 )}
 
-                                {!isUploading && formdata.logo !== "" && (
+                                {!isUploadingStartupImage && formdata.logo !== "" && (
                                     <img
                                         src={formdata.logo}
                                         alt="start-up logo"
@@ -622,7 +543,18 @@ export default function CreateStartUpPage() {
                                                     onDrop={async (files) => {
                                                         const file = files[0];
                                                         if (file) {
-                                                            await uploadToCloudinary(file as any);
+                                                            try {
+                                                                setIsUploadingStartupImage(true)
+                                                                const startupUrl = await uploadToCloudinary(file as any);
+                                                                if (startupUrl) setFormData((prev) => ({ ...prev, logo: startupUrl }))
+                                                                toast.success('Photo uploaded successfully')
+                                                            } catch (error: any) {
+                                                                console.error(error)
+                                                                toast.error(error.response?.data?.message)
+                                                            } finally {
+                                                                setIsUploadingStartupImage(false)
+                                                            }
+
                                                         }
                                                     }}
                                                 />
@@ -739,7 +671,113 @@ export default function CreateStartUpPage() {
                     </div>
                 </section>
             </main >
-            <FoundedDialog openDialog={openDialog} setOpenDialog={setOpenDialog} />
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogContent className="">
+                    <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
+                        <DialogTitle className="text-[20px] font-bold text-[#344054]">
+                            <p>Add Founder</p>
+                            <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                                {isUploadingFounderImage ? (
+                                    <div className="flex flex-col items-center">
+                                        <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
+                                        <p className="text-xs text-gray-500 mt-1">Uploading...</p>
+                                    </div>
+                                ) : founder.photo ? (
+                                    <img
+                                        src={founder.photo}
+                                        alt="founder photo"
+                                        className="object-cover w-full h-full rounded-lg"
+                                    />
+                                ) : (
+                                    <p className="text-sm text-gray-500">No photo uploaded yet</p>
+                                )}
+                            </div>
+                        </DialogTitle>
+                        <div className="w-full grid grid-cols-1 gap-2">
+                            {FoundersData.map((item, index) => (
+                                <div key={index} className="gap-1.5 mb-3 sm:mb-3 lg:mb-4">
+                                    <Label htmlFor={item.name} className="">
+                                        {item.label}
+                                    </Label>
+
+                                    {item.type === 'photo' ? (
+                                        <>
+                                            <Uploader
+                                                accept="image/*"
+                                                maxSize={5 * 1024 * 1024}
+                                                onDrop={async (files) => {
+                                                    const file = files[0];
+                                                    if (file) {
+                                                        setIsUploadingFounderImage(true)
+                                                        try {
+                                                            const founderUrl = await uploadToCloudinary(file);
+                                                            if (founderUrl) setFounder((prev) => ({
+                                                                ...prev,
+                                                                photo: founderUrl
+                                                            }))
+                                                            toast.success('Photo uploaded successfully')
+                                                        } catch (error) {
+                                                            toast.error('Failed to upload founder photo');
+                                                        } finally {
+                                                            setIsUploadingFounderImage(false)
+                                                        }
+
+                                                    }
+                                                }}
+                                            />
+                                            {founderErrors[item.name] && (
+                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Input
+                                                type={item.type}
+                                                id={item.name}
+                                                name={item.name}
+                                                value={getFounderFormValue(item.name as keyof FounderInterface)}
+                                                onChange={(e) => onChangeFounderHandler(item.name as keyof FounderInterface, e.target.value)}
+                                                placeholder={item.placeholder}
+                                                className={cn(
+                                                    "w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal",
+                                                    founderErrors[item.name] && "border-red-500"
+                                                )}
+                                            />
+                                            {founderErrors[item.name] && (
+                                                <p className="text-red-500 text-sm mt-1">{founderErrors[item.name]}</p>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
+                            <button
+                                type="button"
+                                onClick={handleAddFounder}
+                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
+                            >
+                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                    {formdata.founders.length > 0 ? 'Add More' : 'Add'}
+                                </p>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setOpenDialog(false)
+                                    setFounder(FoundersDto)
+                                }}
+                                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
+                            >
+                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
+                                    {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
+                                </p>
+                            </button>
+                        </div>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

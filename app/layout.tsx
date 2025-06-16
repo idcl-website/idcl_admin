@@ -69,7 +69,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${satoshi.variable} ${roboto.variable} ${figtree.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminLogin } from '../../services/auth';
 import AppLogo from '@/components/general/logo';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +20,8 @@ export default function AdminLoginPage() {
     setError('');
     try {
       const data = await adminLogin(email, password);
-      localStorage.setItem('admin_jwt', data.accessToken);
+      console.log(data)
+      login(data.accessToken);
       router.push('/admin/dashboard/start-ups');
     } catch (err: unknown) {
       if (err instanceof Error) {

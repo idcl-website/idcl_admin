@@ -13,8 +13,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+
 
 export default function DashboardHeader() {
+    const { logout } = useAuth()
     const pathname = usePathname()
     const [currentPath, setCurrentPath] = useState<string>('')
 
@@ -47,13 +50,19 @@ export default function DashboardHeader() {
                         <Image src={dropdown} alt="user" priority width={23} height={23} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem>
+                        {/* <DropdownMenuItem>
                             <User className="h-4 w-4 mr-2" />
                             <span>Profile</span>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem>
                             <LogOut className="h-4 w-4 mr-2" />
-                            <span>Logout</span>
+                            <button
+                                onClick={() => {
+                                    logout();
+                                }}
+                            >
+                                Logout
+                            </button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
