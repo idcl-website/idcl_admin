@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
     try {
       const data = await adminLogin(email, password);
       localStorage.setItem('admin_jwt', data.accessToken);
-      router.push('/dashboard');
+      router.push('/admin/dashboard/start-ups');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
