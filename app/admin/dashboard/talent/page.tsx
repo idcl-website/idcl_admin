@@ -6,7 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Search } from "lucide-react";
+import { Search, Eye, Signature } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -34,6 +34,15 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import Link from "next/link";
 
 const TalentFilters = [
     {
@@ -51,7 +60,7 @@ const TalentFilters = [
 ]
 
 
-interface TalentInterface {
+export interface TalentInterface {
     id: string,
     image: string,
     track: string,
@@ -249,7 +258,29 @@ export default function TalentPage() {
                                     <TableCell className="text-[#667085]">{talent.email}</TableCell>
                                     <TableCell className="text-[#667085]">{talent.track}</TableCell>
                                     <TableCell className="text-[#667085]">{talent.date}</TableCell>
-                                    <TableCell className="text-right"><Image src={more} alt="more" priority /></TableCell>
+                                    <TableCell className="">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger>
+                                                <Image src={more} alt="more" priority />
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem>
+                                                    <Eye className="h-4 w-4 mr-2" />
+                                                    <button onClick={() => {
+                                                        router.push(`/admin/dashboard/talent/${talent.id}`)
+                                                    }}>
+                                                        View
+                                                    </button>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                    <Signature className="h-4 w-4 mr-2" />
+                                                    <button onClick={() => { }}>
+                                                        Approve
+                                                    </button>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

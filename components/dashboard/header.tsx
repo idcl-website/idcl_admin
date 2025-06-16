@@ -50,10 +50,6 @@ export default function DashboardHeader() {
                         <Image src={dropdown} alt="user" priority width={23} height={23} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        {/* <DropdownMenuItem>
-                            <User className="h-4 w-4 mr-2" />
-                            <span>Profile</span>
-                        </DropdownMenuItem> */}
                         <DropdownMenuItem>
                             <LogOut className="h-4 w-4 mr-2" />
                             <button

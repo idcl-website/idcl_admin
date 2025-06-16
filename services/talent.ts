@@ -20,5 +20,10 @@ export const TalentService = {
             }
         });
         return response.data;
+    },
+
+    getTalent: async (id: string) => {
+        const response = await axiosInstance.get(`/admin/talent/${id}`)
+        return response.data;
     }
 }
