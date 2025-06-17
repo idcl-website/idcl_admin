@@ -449,8 +449,8 @@ export default function CreateStartUpPage() {
     return (
         <>
             <Toaster richColors position="top-center" />
-            <main className="w-full flex flex-col md:flex-row gap-4 lg:gap-[25px] items-start justify-center mb-6">
-                <button onClick={() => router.back()} >
+            <main className="w-full px-4 sm:px-6 lg:px-0 flex flex-col md:flex-row gap-4 lg:gap-[25px] items-start justify-center mb-6">
+                <button onClick={() => router.back()} className="mt-4 sm:mt-0">
                     <Image
                         src={back}
                         alt="Back-Button"
@@ -459,13 +459,13 @@ export default function CreateStartUpPage() {
                         className="object-cover"
                     />
                 </button>
-                <section className="w-full md:w-[834px] p-[32px] rounded-[16px] bg-white border border-stroke border-[#E4E4E4]">
-                    <div className="bg-white flex flex-col items-start gap-[24px]">
-                        <div className="w-full flex items-start justify-between">
-                            <h1 className="font-figtree text-[21px] font-bold leading-[31px]">
+                <section className="w-full max-w-4xl md:w-[834px] p-4 sm:p-6 lg:p-[32px] rounded-[16px] bg-white border border-stroke border-[#E4E4E4]">
+                    <div className="bg-white flex flex-col items-start gap-4 sm:gap-6 lg:gap-[24px]">
+                        <div className="w-full flex flex-col sm:flex-row items-start justify-between gap-4">
+                            <h1 className="font-figtree text-lg sm:text-xl lg:text-[21px] font-bold leading-[31px]">
                                 Start-Up Details
                             </h1>
-                            <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                            <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
                                 {isUploadingStartupImage && (
                                     <div className="flex flex-col items-center">
                                         <LoaderCircle className="animate-spin text-blue-400 w-6 h-6" />
@@ -487,10 +487,9 @@ export default function CreateStartUpPage() {
                                     />
                                 )}
                             </div>
-
                         </div>
                         <form className="w-full" onSubmit={handleSubmit}>
-                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                 {startUpData.map((item, index) => (
                                     <div
                                         key={index}
@@ -499,7 +498,7 @@ export default function CreateStartUpPage() {
                                             item.full ? "md:col-span-2" : "md:col-span-1"
                                         )}
                                     >
-                                        <Label htmlFor={item.name} className="">
+                                        <Label htmlFor={item.name} className="text-sm sm:text-base">
                                             {item.label}
                                         </Label>
 
@@ -511,7 +510,7 @@ export default function CreateStartUpPage() {
                                                     }}
                                                     value={formdata.type || ""}
                                                 >
-                                                    <SelectTrigger className="w-full text-[14px] sm:text-[15px] lg:text-[16px] border border-[#D0D5DD]">
+                                                    <SelectTrigger className="w-full text-sm sm:text-[15px] lg:text-[16px] border border-[#D0D5DD]">
                                                         <SelectValue placeholder="Select business type" />
                                                     </SelectTrigger>
                                                     <SelectContent
@@ -571,7 +570,7 @@ export default function CreateStartUpPage() {
                                                     onChange={(e) => onChangeHandler(item.name as keyof startupDto, e.target.value)}
                                                     placeholder={item.placeholder}
                                                     className={cn(
-                                                        "w-full min-h-[120px] sm:min-h-[110px] lg:min-h-[120px] text-[14px] sm:text-[15px] lg:text-[16px]",
+                                                        "w-full min-h-[100px] sm:min-h-[110px] lg:min-h-[120px] text-sm sm:text-[15px] lg:text-[16px]",
                                                         formErrors[item.name] && "border-red-500"
                                                     )}
                                                 />
@@ -587,15 +586,15 @@ export default function CreateStartUpPage() {
                                                             variant="outline"
                                                             data-empty={!date}
                                                             className={cn(
-                                                                "data-[empty=true]:text-muted-foreground w-full bg-white border-[#E1E5EB] h-[46px] justify-start text-left font-normal",
+                                                                "data-[empty=true]:text-muted-foreground w-full bg-white border-[#E1E5EB] h-[40px] sm:h-[46px] justify-start text-left font-normal",
                                                                 formErrors[item.name] && "border-red-500"
                                                             )}
                                                         >
-                                                            <CalendarIcon />
+                                                            <CalendarIcon className="h-4 w-4" />
                                                             {date ? format(date, "PPP") : <span>Pick a date</span>}
                                                         </Button>
                                                     </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0 ml-8 " align="start">
+                                                    <PopoverContent className="w-auto p-0 sm:ml-8" align="start">
                                                         <Calendar
                                                             mode="single"
                                                             selected={date}
@@ -617,7 +616,7 @@ export default function CreateStartUpPage() {
                                                     onChange={(e) => onChangeHandler(item.name as keyof startupDto, e.target.value)}
                                                     placeholder={item.placeholder}
                                                     className={cn(
-                                                        "w-full placeholder:font-figtree text-[14px] sm:text-[15px] lg:text-[16px]",
+                                                        "w-full placeholder:font-figtree text-sm sm:text-[15px] lg:text-[16px]",
                                                         formErrors[item.name] && "border-red-500"
                                                     )}
                                                 />
@@ -645,7 +644,7 @@ export default function CreateStartUpPage() {
                                         className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
                                         onClick={() => setOpenDialog(true)}
                                     >
-                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                        <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
                                             Add founders ({formdata.founders.length})
                                         </p>
                                     </button>
@@ -654,10 +653,10 @@ export default function CreateStartUpPage() {
                                         disabled={formdata.founders.length < 1 || isSubmitting}
                                         className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px] flex items-center gap-2">
+                                        <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#fff] leading-[24px] flex items-center gap-2">
                                             {isSubmitting ? (
                                                 <>
-                                                    <LoaderCircle className="animate-spin" />
+                                                    <LoaderCircle className="animate-spin h-4 w-4" />
                                                     Submitting...
                                                 </>
                                             ) : (
@@ -670,11 +669,11 @@ export default function CreateStartUpPage() {
                         </form>
                     </div>
                 </section>
-            </main >
+            </main>
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogContent className="">
-                    <DialogHeader className="max-h-[90vh] overflow-y-auto scrollbar-hide">
-                        <DialogTitle className="text-[20px] font-bold text-[#344054]">
+                <DialogContent className="max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl">
+                    <DialogHeader className="max-h-[80vh] overflow-y-auto scrollbar-hide">
+                        <DialogTitle className="text-lg sm:text-xl lg:text-[20px] font-bold text-[#344054]">
                             <p>Add Founder</p>
                             <div className="min-h-[80px] min-w-[80px] max-w-[120px] max-h-[120px] mt-4 relative flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
                                 {isUploadingFounderImage ? (
@@ -696,7 +695,7 @@ export default function CreateStartUpPage() {
                         <div className="w-full grid grid-cols-1 gap-2">
                             {FoundersData.map((item, index) => (
                                 <div key={index} className="gap-1.5 mb-3 sm:mb-3 lg:mb-4">
-                                    <Label htmlFor={item.name} className="">
+                                    <Label htmlFor={item.name} className="text-sm sm:text-base">
                                         {item.label}
                                     </Label>
 
@@ -739,7 +738,7 @@ export default function CreateStartUpPage() {
                                                 onChange={(e) => onChangeFounderHandler(item.name as keyof FounderInterface, e.target.value)}
                                                 placeholder={item.placeholder}
                                                 className={cn(
-                                                    "w-full placeholder:font-figtree text-[14px] sm:text-[10px] lg:text-[13px] font-normal",
+                                                    "w-full placeholder:font-figtree text-sm sm:text-[14px] lg:text-[13px] font-normal",
                                                     founderErrors[item.name] && "border-red-500"
                                                 )}
                                             />
@@ -758,7 +757,7 @@ export default function CreateStartUpPage() {
                                 onClick={handleAddFounder}
                                 className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
                             >
-                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
                                     {formdata.founders.length > 0 ? 'Add More' : 'Add'}
                                 </p>
                             </button>
@@ -770,7 +769,7 @@ export default function CreateStartUpPage() {
                                 }}
                                 className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors"
                             >
-                                <p className="font-figtree font-semibold text-base md:text-[18px] text-[#fff] leading-[24px]">
+                                <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#fff] leading-[24px]">
                                     {formdata.founders.length > 0 ? 'Done' : 'Cancel'}
                                 </p>
                             </button>

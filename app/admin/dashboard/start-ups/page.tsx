@@ -71,7 +71,6 @@ export default function Dashboardpage() {
     });
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Handle filter changes
     const handleFilterChange = (filterName: string, value: string) => {
         setFilters(prev => ({
             ...prev,
@@ -86,7 +85,6 @@ export default function Dashboardpage() {
     useEffect(() => {
         let results = [...startups];
 
-        // Apply search filter
         if (searchQuery) {
             results = results.filter(startup =>
                 startup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +93,6 @@ export default function Dashboardpage() {
             );
         }
 
-        // Apply sort filter
         if (filters.sort !== 'Show All') {
             results = results.filter(startup => {
                 if (filters.sort === 'Approved') return startup.isApproved;
@@ -103,12 +100,10 @@ export default function Dashboardpage() {
             });
         }
 
-        // Apply type filter
         if (filters.type !== 'Show All') {
             results = results.filter(startup => startup.type === filters.type);
         }
 
-        // Apply batch filter (assuming date contains year)
         if (filters.batch !== 'Show All') {
             results = results.filter(startup => startup.date.toString() === filters.batch);
         }
@@ -116,13 +111,10 @@ export default function Dashboardpage() {
         setFilteredStartups(results);
     }, [startups, searchQuery, filters]);
 
-
-
     useEffect(() => {
         const getStarUps = async () => {
             try {
                 const data = await startUpService.getAllStarups();
-                console.log(data)
                 setStartups(data)
             } catch (error: any) {
                 const resError = error.response?.data?.message || "An Internal Server Error"
@@ -131,48 +123,48 @@ export default function Dashboardpage() {
                 setIsFetching(false)
             }
         }
-
         getStarUps();
     }, [])
 
-
     if (isFetching) return <StarupSkelenton />
+
     return (
         <>
             <Toaster richColors position="top-center" />
-            <div className="space-y-6">
-                <div className="w-full flex items-center gap-[40px]">
-                    <div className="w-full md:max-w-[949px] py-[11px] px-[20px] bg-white rounded-[10px]">
-                        <aside className="w-full flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-[20px]">
-                            <div className="relative w-full md:max-w-[410px]">
+            <div className="space-y-4 md:space-y-6 p-4 md:p-0">
+                {/* Search and Filter Section */}
+                <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-[40px]">
+                    <div className="w-full md:max-w-[949px] py-3 md:py-[11px] px-4 md:px-[20px] bg-white rounded-lg md:rounded-[10px]">
+                        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-[20px]">
+                            {/* Search Input */}
+                            <div className="relative w-full">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                     placeholder="Search"
-                                    className="pl-10 rounded-[16px] w-full bg-white"
+                                    className="pl-10 rounded-lg md:rounded-[16px] w-full bg-white text-sm md:text-base"
                                     value={searchQuery}
                                     onChange={handleSearch}
                                 />
                             </div>
 
-
-                            <div className={`w-full flex items-start gap-[10px]`}>
+                            {/* Filters */}
+                            <div className="w-full grid grid-cols-2 sm:flex items-start gap-2 sm:gap-[10px]">
                                 {startUpFilters.map((filter, index) => (
-                                    <div key={index} className={`h-[35px] w-full md:w-[${filter.width}px]! rounded-[8px] py-[5px] px-[12px] bg-[#F0F2F5] flex items-center gap-[11px]`}>
-                                        <p className="font-inter font-normal text-xs sm:text-sm md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
+                                    <div key={index} className={`h-[35px] w-full rounded-lg md:rounded-[8px] py-1.5 md:py-[5px] px-2 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]`}>
+                                        <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
                                             {filter.title}
                                         </p>
-
                                         <Select
                                             value={filters[filter.title as keyof typeof filters]}
                                             onValueChange={(value) => handleFilterChange(filter.title, value)}
                                         >
                                             <SelectTrigger
-                                                className={`w-full md:w-[${filter.selectWidth}px] h-[25px]! rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]`}
+                                                className={`h-[25px] rounded-sm md:rounded-[4px] bg-white flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF] text-xs md:text-[10px]`}
                                             >
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent
-                                                className="rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
+                                                className="rounded-lg md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
                                                 position="popper"
                                                 align="end"
                                             >
@@ -180,7 +172,7 @@ export default function Dashboardpage() {
                                                     <SelectItem
                                                         key={optionIndex}
                                                         value={option.toString()}
-                                                        className="font-inter font-medium text-xs sm:text-sm md:text-[10px] focus:bg-[#D0D5DD]"
+                                                        className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
                                                     >
                                                         {option}
                                                     </SelectItem>
@@ -190,26 +182,47 @@ export default function Dashboardpage() {
                                     </div>
                                 ))}
                             </div>
-                        </aside >
-                    </div >
+                        </div>
+                    </div>
+
+                    {/* Add New Button */}
                     <button
-                        onClick={() => {
-                            router.push('/admin/dashboard/start-ups/add-new-startup')
-                        }}
-                        className="bg-[#005EFF] w-full md:w-[123px] py-[11.5px] px-[20px] rounded-[10px] cursor-pointer"
+                        onClick={() => router.push('/admin/dashboard/start-ups/add-new-startup')}
+                        className="bg-[#005EFF] w-full md:w-[123px] py-2 md:py-[11px] px-4 md:px-[20px] rounded-lg md:rounded-[10px] cursor-pointer hover:bg-[#0050D6] transition-colors"
                     >
-                        <span className="font-roboto text-white text-[15px] font-medium leading-normal">Add New</span>
+                        <span className="font-roboto text-white text-sm md:text-[15px] font-medium leading-normal">Add New</span>
                     </button>
                 </div>
 
-                <p className="text-[#475467] text-[16px] font-bold leading-[21px]">Star Start-Up To Add To Rising Talent</p>
+                {/* Title */}
+                <p className="text-[#475467] text-sm md:text-[16px] font-bold leading-[21px]">
+                    Star Start-Up To Add To Rising Talent
+                </p>
 
-                {/* EXPLORE STARTUPS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[39px]">
+                {/* Startups Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-[39px]">
                     {filteredStartups.map((item, index) => (
                         <ExploreStartUp key={index} {...item} setStartups={setStartups} />
                     ))}
                 </div>
+
+                {/* Pagination - You can implement this when needed */}
+                {/* <Pagination>
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious href="#" />
+                        </PaginationItem>
+                        <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                            <PaginationEllipsis />
+                        </PaginationItem>
+                        <PaginationItem>
+                            <PaginationNext href="#" />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination> */}
             </div>
         </>
     )

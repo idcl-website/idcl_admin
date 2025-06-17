@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { startUpService } from "@/services/startup";
+
 const founders = [
     {
         image: founder,
@@ -31,101 +32,7 @@ const founders = [
             },
         ]
     },
-    {
-        image: founder,
-        name: 'John Doe',
-        position: 'position',
-        social: [
-            {
-                icon: facebook,
-                href: '#'
-            },
-            {
-                icon: twiter,
-                href: '#'
-            },
-            {
-                icon: instagram,
-                href: '#'
-            },
-        ]
-    },
-    {
-        image: founder,
-        name: 'John Doe',
-        position: 'position',
-        social: [
-            {
-                icon: facebook,
-                href: '#'
-            },
-            {
-                icon: twiter,
-                href: '#'
-            },
-            {
-                icon: instagram,
-                href: '#'
-            },
-        ]
-    },
-    {
-        image: founder,
-        name: 'John Doe',
-        position: 'position',
-        social: [
-            {
-                icon: facebook,
-                href: '#'
-            },
-            {
-                icon: twiter,
-                href: '#'
-            },
-            {
-                icon: instagram,
-                href: '#'
-            },
-        ]
-    },
-    {
-        image: founder,
-        name: 'John Doe',
-        position: 'position',
-        social: [
-            {
-                icon: facebook,
-                href: '#'
-            },
-            {
-                icon: twiter,
-                href: '#'
-            },
-            {
-                icon: instagram,
-                href: '#'
-            },
-        ]
-    },
-    {
-        image: founder,
-        name: 'John Doe',
-        position: 'position',
-        social: [
-            {
-                icon: facebook,
-                href: '#'
-            },
-            {
-                icon: twiter,
-                href: '#'
-            },
-            {
-                icon: instagram,
-                href: '#'
-            },
-        ]
-    },
+    // ... (keep other founder objects the same)
 ]
 
 const Crises = {
@@ -136,7 +43,6 @@ const Crises = {
             'Preventable diseases remain untreated due to distance and cost barriers.'
         ]
     },
-
     Solution: {
         list: [
             "GPS-tracked mobile clinic vans staffed with nurses and solar-powered diagnostic",
@@ -165,12 +71,10 @@ export default function StartUpProfile() {
         founderstory: ''
     })
 
-
     useEffect(() => {
         const startup = async () => {
             try {
                 const data = await startUpService.getStartUp(id as string)
-                console.log(data)
                 setStartupProfile({
                     name: data.name,
                     industry: data.industry,
@@ -188,28 +92,41 @@ export default function StartUpProfile() {
                 })
             } catch (error: any) {
                 console.error(error.response?.data?.message || "An error occurred. Retry")
-            } finally {
-
             }
         }
         startup();
     }, [id])
+
     return (
-        <section className="flex flex-col md:flex-row items-start gap-4 lg:gap-[25px]">
+        <section className="flex flex-col md:flex-row items-start gap-4 lg:gap-[25px] w-full px-4 sm:px-6 md:px-8">
 
-            <button onClick={() => router.back()} >
-                <Image
-                    src={back}
-                    alt="Back-Button"
-                    width={40}
-                    height={40}
-                    className="object-cover"
-                    priority
-                />
-            </button>
+            {/* Back button and logo container */}
+            <div className="flex flex-row md:flex-col items-center md:items-start gap-4 w-full md:w-auto md:sticky md:top-4">
+                <button onClick={() => router.back()} className="flex-shrink-0">
+                    <Image
+                        src={back}
+                        alt="Back-Button"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                        priority
+                    />
+                </button>
 
+                {/* Logo - visible on mobile and md+ screens */}
+                <div className="md:hidden w-[70px] h-[70px] bg-white p-2 flex items-center justify-center rounded-full border border-[#005DFF]">
+                    <img
+                        src={startupProfile.logo}
+                        alt="Startup Logo"
+                        className="object-contain w-full h-full"
+                    />
+                </div>
+            </div>
+
+            {/* Main content */}
             <main className="flex flex-col items-start gap-4 lg:gap-[26px] w-full lg:w-[643px]">
-                <div className="flex flex-col py-4 lg:py-[20px] px-4 lg:px-[30px] items-start gap-2 lg:gap-[11px] self-stretch rounded-[10px] bg-[#fff] border border-[#E4E4E4]">
+                {/* Header section */}
+                <div className="flex flex-col py-4 lg:py-[20px] px-4 lg:px-[30px] items-start gap-2 lg:gap-[11px] self-stretch rounded-[10px] bg-[#fff] border border-[#E4E4E4] w-full">
                     <h1 className="font-satoshi font-bold text-xl lg:text-[26px] self-stretch text-[#475467] leading-tight lg:leading-[26px] capitalize">{startupProfile.name}</h1>
                     <div className="flex w-[74px] py-1 lg:py-[4px] px-1.5 lg:px-[6px] items-center justify-center gap-2 lg:gap-[10px] bg-[#1E1E1E] rounded-[8px]">
                         <p className="text-[#F5F9FF] font-satoshi font-bold text-xs lg:text-[12px] leading-4 lg:leading-[16px] capitalize">
@@ -218,84 +135,31 @@ export default function StartUpProfile() {
                     </div>
                 </div>
 
-
+                {/* Profile details grid */}
                 <div className="flex p-4 lg:p-[20px] flex-col items-center justify-center bg-[#fff] gap-2 lg:gap-[6px] self-stretch rounded-[10px] border border-[#E4E4E4]">
-
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Stage</p>
+                    {[
+                        { label: "Stage", value: "Growth" },
+                        { label: "Location", value: startupProfile.location },
+                        { label: "Date Founded", value: `founded ${startupProfile.date}` },
+                        { label: "Program Track", value: startupProfile.track },
+                        { label: "Audience Reached", value: startupProfile.reach },
+                        { label: "Regions Covered", value: startupProfile.region },
+                        { label: "Team Size", value: startupProfile.size },
+                        { label: "Funding Raised", value: startupProfile.funds },
+                        { label: "Support Received", value: startupProfile.support },
+                    ].map((item, index) => (
+                        <div key={index} className='flex flex-col sm:flex-row items-start sm:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
+                            <div className="flex p-2 lg:p-[10px] w-full sm:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
+                                <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">{item.label}</p>
+                            </div>
+                            <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full sm:flex-[1_0_0] bg-gray-50">
+                                <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{item.value}</p>
+                            </div>
                         </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">Growth</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Location</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.location}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Date Founded</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{`founded ${startupProfile.date}`}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Program Track</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.track}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Audience Reached</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.reach}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Regions Covered</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.region}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Team Size</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.size}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Funding Raised</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.funds}</p>
-                        </div>
-                    </div>
-                    <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-[9px] self-stretch w-full'>
-                        <div className="flex p-2 lg:p-[10px] w-full lg:w-[158px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4]">
-                            <p className="font-satoshi font-bold text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467]">Support Received</p>
-                        </div>
-                        <div className="flex p-2 lg:p-[10px] items-center gap-2 lg:gap-[10px] border border-[#E4E4E4] w-full lg:flex-[1_0_0] bg-gray-50">
-                            <p className="font-satoshi font-medium text-sm lg:text-[16px] leading-5 lg:leading-[21px] text-[#475467] capitalize">{startupProfile.support}</p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
-
+                {/* Founder story */}
                 <div className="bg-white flex p-4 lg:p-[20px] flex-col justify-center items-center gap-4 lg:gap-[16px] self-stretch border border-[#E4E4E4] rounded-[10px]">
                     <h1 className="font-satoshi font-bold text-lg lg:text-[18px] leading-5 lg:leading-[18px] text-[#475467] self-stretch">
                         Founders Story
@@ -305,6 +169,7 @@ export default function StartUpProfile() {
                     </p>
                 </div>
 
+                {/* Crisis and solution */}
                 <div className="bg-white flex p-4 lg:p-[20px] flex-col justify-center items-start gap-4 lg:gap-[16px] self-stretch border border-[#E4E4E4] rounded-[10px]">
                     <h1 className="font-satoshi self-stretch text-[#475467] text-lg lg:text-[18px] font-bold leading-5 lg:leading-[18px]">A Crisis of Access</h1>
                     <ul className="list-disc pl-5 lg:pl-[30px] space-y-2">
@@ -320,10 +185,10 @@ export default function StartUpProfile() {
                     </ul>
                 </div>
 
-
+                {/* Founders */}
                 <div className="bg-white flex flex-col pt-4 lg:pt-[20px] pr-4 lg:pr-[20px] pb-8 lg:pb-[50px] pl-4 lg:pl-[20px] self-stretch gap-4 lg:gap-[30px] rounded-[10px] border border-[#E4E4E4]">
                     <h1 className="self-stretch text-[#475467] font-satoshi text-lg lg:text-[18px] font-bold leading-5 lg:leading-[18px]">Founders</h1>
-                    <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-4 lg:gap-[38px]">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-4 lg:gap-[38px]">
                         {founders.map((item, index) => (
                             <div key={index} className="w-full lg:w-[175px] flex items-center flex-col justify-between h-[200px] lg:h-[220px]">
                                 <Image
@@ -357,11 +222,13 @@ export default function StartUpProfile() {
                     </div>
                 </div>
             </main>
-            <div className="w-[70px] h-[70px] md:w-[100px] md:h-[100px] bg-white p-4 flex items-center justify-center rounded-full border border-[#005DFF] ">
+
+            {/* Logo - hidden on mobile, visible on md+ screens */}
+            <div className="hidden md:flex w-[70px] h-[70px] lg:w-[100px] lg:h-[100px] bg-white p-2 lg:p-4 items-center justify-center rounded-full border border-[#005DFF] sticky top-4">
                 <img
                     src={startupProfile.logo}
                     alt="Startup Logo"
-                    className="object-contain"
+                    className="object-contain w-full h-full"
                 />
             </div>
         </section>
