@@ -11,32 +11,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <>
-      <RequireAuth>
-        <Toaster richColors position="top-center" />
-        <MobileMenuButton
-          isOpen={mobileMenuOpen}
-          toggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+    <RequireAuth>
+      <Toaster richColors position="top-center" />
+      <MobileMenuButton
+        isOpen={mobileMenuOpen}
+        toggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+      />
+      <div className="flex min-h-screen lg:p-4"> {/* Added lg padding */}
+        <AsideView
+          isMobileOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
         />
-        <div className="flex min-h-screen p-4">
-          <AsideView
-            isMobileOpen={mobileMenuOpen}
-            onClose={() => setMobileMenuOpen(false)}
-          />
-          <div className={cn(
-            "flex-1 overflow-auto",
-            "lg:ml-[208px]",
-            mobileMenuOpen && "ml-[208px]"
-          )}>
-            <section className="space-y-6 px-2 md:px-[30px]">
-              <DashboardHeader />
-              <main>
-                {children}
-              </main>
-            </section>
-          </div>
+        {/* Main content area */}
+        <div className={cn(
+          "flex-1 flex flex-col transition-all duration-300",
+          "lg:ml-[224px] space-y-4 p-4 " // Added right padding on desktop
+        )}>
+          <DashboardHeader />
+          <main className="flex-1 overflow-auto lg:rounded-[10px]">
+            {children}
+          </main>
         </div>
-      </RequireAuth>
-    </>
+      </div>
+    </RequireAuth>
   );
 }

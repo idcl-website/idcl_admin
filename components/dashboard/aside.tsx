@@ -3,7 +3,7 @@ import DashboardLogo from "../general/dashlogo";
 import AdminNavigation from "./nav";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-
+import { usePathname } from "next/navigation"
 interface AsideViewProps {
     isMobileOpen: boolean;
     onClose: () => void;
@@ -11,6 +11,7 @@ interface AsideViewProps {
 
 export default function AsideView({ isMobileOpen, onClose }: AsideViewProps) {
     const [isMobile, setIsMobile] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
         const handleResize = () => {
@@ -27,7 +28,7 @@ export default function AsideView({ isMobileOpen, onClose }: AsideViewProps) {
 
     return (
         <>
-            {/* Mobile overlay - only visible when menu is open on mobile */}
+            {/* Mobile overlay */}
             {isMobileOpen && isMobile && (
                 <div
                     className="fixed inset-0 bg-black/50 lg:hidden z-40"
@@ -38,8 +39,8 @@ export default function AsideView({ isMobileOpen, onClose }: AsideViewProps) {
             <aside className={cn(
                 "bg-[#fff] w-[208px] fixed h-screen py-[26px] px-[15px] flex flex-col items-center gap-[179px]",
                 "transition-transform duration-300 ease-in-out",
-                "lg:translate-x-0 lg:z-20", // Always visible on desktop
-                isMobile ? "z-40" : "z-20", // Higher z-index on mobile
+                "lg:translate-x-0 lg:z-20 lg:left-4 lg:top-4 lg:h-[calc(100vh-32px)] lg:rounded-[10px]", // Desktop positioning
+                isMobile ? "z-40" : "z-20",
                 isMobile ? (isMobileOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
             )}>
                 <DashboardLogo />
