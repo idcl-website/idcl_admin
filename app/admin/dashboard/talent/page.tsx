@@ -140,6 +140,7 @@ export default function TalentPage() {
         }));
     }
 
+
     if (isfetching) {
         return <TalentPageSkeleton />
     }
@@ -283,8 +284,18 @@ export default function TalentPage() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Signature className="h-4 w-4 mr-2" />
-                                                    <button onClick={() => { }}>
-                                                        Approve
+                                                    <button onClick={async () => {
+                                                        try {
+                                                            await TalentService.toggleTalentStatus(talent.id)
+                                                            setFilteredTalents((prev) => prev.map(item => item.id === talent.id ? { ...item, isApproved: !item.isApproved } : item))
+                                                            toast.success('talent have approved')
+                                                        } catch (error: any) {
+                                                            const resError = error.response?.data?.message
+                                                            console.error(resError)
+                                                            toast.error(resError)
+                                                        }
+                                                    }}>
+                                                        {talent.isApproved ? 'Disapprove' : 'Approve'}
                                                     </button>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
