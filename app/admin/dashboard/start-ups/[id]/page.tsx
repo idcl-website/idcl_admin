@@ -40,7 +40,7 @@ const Crises = {
         list: [
             'Over 60% of rural communities in Northern Nigeria lack access to basic healthcare.',
             'Patients travel 1030km to see a doctor, often by foot or motorcycle.',
-            'Preventable diseases remain untreated due to distance and cost barriers.'
+            'Preventable diseases remain untreated due to distance.'
         ]
     },
     Solution: {
