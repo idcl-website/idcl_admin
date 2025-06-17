@@ -266,7 +266,7 @@ export default function CreateStartUpPage() {
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [founderErrors, setFounderErrors] = useState<Record<string, string>>({});
 
-    const onChangeHandler = (field: keyof startupDto, value: any) => {
+    const onChangeHandler = (field: keyof startupDto, value: unknown) => {
         const processedValue = (field === 'type' && value === "") ? undefined : value;
         setFormData(prev => ({
             ...prev,
@@ -276,7 +276,7 @@ export default function CreateStartUpPage() {
         validateField(field, processedValue);
     };
 
-    const onChangeFounderHandler = (field: keyof FounderInterface, value: any) => {
+    const onChangeFounderHandler = (field: keyof FounderInterface, value: unknown) => {
         setFounder((prev) => ({
             ...prev,
             [field]: value
@@ -286,7 +286,7 @@ export default function CreateStartUpPage() {
 
 
     // Validate individual field
-    const validateField = async (fieldName: keyof startupDto, value: any) => {
+    const validateField = async (fieldName: keyof startupDto, value: unknown) => {
         try {
             // Create a partial object with just the field we want to validate
             const partialData = { [fieldName]: value };
@@ -314,7 +314,7 @@ export default function CreateStartUpPage() {
     };
 
     // Validate founder field
-    const validateFounderField = async (fieldName: keyof FounderInterface, value: any) => {
+    const validateFounderField = async (fieldName: keyof FounderInterface, value: unknown) => {
         try {
             // Create a partial object with just the field we want to validate
             const partialData = { [fieldName]: value };

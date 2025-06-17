@@ -119,9 +119,11 @@ export default function StartUpProfile() {
 
                 {/* Logo - visible on mobile and md+ screens */}
                 <div className="md:hidden w-[70px] h-[70px] bg-white p-2 flex items-center justify-center rounded-full border border-[#005DFF]">
-                    <img
+                    <Image
                         src={startupProfile.logo}
                         alt="Startup Logo"
+                        width={70}
+                        height={70}
                         className="object-contain w-full h-full"
                     />
                 </div>
@@ -181,7 +183,7 @@ export default function StartUpProfile() {
                             <li key={index} className="font-satoshi self-stretch text-[#475467] text-base lg:text-[18px] font-normal leading-6 lg:leading-[27px]">{item}</li>
                         ))}
                     </ul>
-                    <h1 className="font-satoshi self-stretch text-[#475467] text-lg lg:text-[18px] font-bold leading-5 lg:leading-[18px]">MediBridge's Solution:</h1>
+                    <h1 className="font-satoshi self-stretch text-[#475467] text-lg lg:text-[18px] font-bold leading-5 lg:leading-[18px]"><p>{`MediBridge's Solution`}</p></h1>
                     <ul className="list-disc pl-5 lg:pl-[30px] space-y-2">
                         {Crises['Solution'].list.map((item, index) => (
                             <li key={index} className="font-satoshi self-stretch text-[#475467] text-base lg:text-[18px] font-normal leading-6 lg:leading-[27px]">{item}</li>

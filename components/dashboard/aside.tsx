@@ -3,7 +3,6 @@ import DashboardLogo from "../general/dashlogo";
 import AdminNavigation from "./nav";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation"
 interface AsideViewProps {
     isMobileOpen: boolean;
     onClose: () => void;
