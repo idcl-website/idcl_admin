@@ -131,10 +131,10 @@ export default function Dashboardpage() {
     return (
         <>
             <Toaster richColors position="top-center" />
-            <div className="space-y-4 md:space-y-6 p-4 md:p-0">
+            <div className="space-y-4 md:space-y-6 md:p-4 md:p-0">
                 {/* Search and Filter Section */}
-                <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-[40px]">
-                    <div className="w-full md:max-w-[949px] py-3 md:py-[11px] px-4 md:px-[20px] bg-white rounded-lg md:rounded-[10px]">
+                <div className="flex flex-col md:flex-row items-start h-auto gap-4 md:gap-[40px]">
+                    <div className="w-full md:max-w-[949px] bg-white p-1 rounded-lg md:rounded-[10px]">
                         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 md:gap-[20px]">
                             {/* Search Input */}
                             <div className="relative w-full">
