@@ -13,7 +13,7 @@ import {
 import ExploreStartUp from "@/components/dashboard/startups";
 import { useEffect, useState } from "react";
 import { startUpService } from "@/services/startup";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import axios from 'axios';
 
 export interface StartUpInterface {

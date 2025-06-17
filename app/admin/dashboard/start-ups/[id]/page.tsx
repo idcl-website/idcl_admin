@@ -144,7 +144,7 @@ export default function StartUpProfile() {
                     {[
                         { label: "Stage", value: "Growth" },
                         { label: "Location", value: startupProfile.location },
-                        { label: "Date Founded", value: `founded ${startupProfile.date}` },
+                        { label: "Date Founded", value: startupProfile.date },
                         { label: "Program Track", value: startupProfile.track },
                         { label: "Audience Reached", value: startupProfile.reach },
                         { label: "Regions Covered", value: startupProfile.region },

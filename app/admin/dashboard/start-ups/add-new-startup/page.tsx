@@ -37,6 +37,7 @@ import { startupSchema, founderSchema } from "@/validation/startup";
 import { LoaderCircle } from 'lucide-react'
 import { startUpService } from "@/services/startup";
 import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
+import axios from "axios";
 
 
 export type FounderInterface = {
@@ -559,8 +560,13 @@ export default function CreateStartUpPage() {
                                                                 if (startupUrl) setFormData((prev) => ({ ...prev, logo: startupUrl }))
                                                                 toast.success('Photo uploaded successfully')
                                                             } catch (error: unknown) {
-                                                                console.error(error)
-                                                                toast.error('failed to upload image')
+                                                                if (axios.isAxiosError(error)) {
+                                                                    const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                                    console.error(resError);
+                                                                    toast.error(resError)
+                                                                } else {
+                                                                    console.error("An unexpected error occurred");
+                                                                }
                                                             } finally {
                                                                 setIsUploadingStartupImage(false)
                                                             }
@@ -727,7 +733,13 @@ export default function CreateStartUpPage() {
                                                             }))
                                                             toast.success('Photo uploaded successfully')
                                                         } catch (error: unknown) {
-                                                            toast.error('Failed to upload founder photo');
+                                                            if (axios.isAxiosError(error)) {
+                                                                const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                                console.error(resError);
+                                                                toast.error(resError)
+                                                            } else {
+                                                                console.error("An unexpected error occurred");
+                                                            }
                                                         } finally {
                                                             setIsUploadingFounderImage(false)
                                                         }
