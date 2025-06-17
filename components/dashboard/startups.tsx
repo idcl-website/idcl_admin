@@ -1,7 +1,7 @@
 import { startUpService } from "@/services/startup";
-import Image from "next/image"
 import Link from "next/link"
 import { toast } from 'sonner'
+import axios from 'axios'
 
 interface StartUpInterface {
     id: string,
@@ -22,14 +22,20 @@ interface ExploreStartUpProps extends StartUpInterface {
 }
 
 
-export default function ExploreStartUp({ id, track, isApproved, reach, story, logo, date, industry, region, name, setStartups }: ExploreStartUpProps) {
+export default function ExploreStartUp({ id, isApproved, reach, story, logo, industry, region, name, setStartups }: ExploreStartUpProps) {
     const updateApproval = async (id: string) => {
         try {
             await startUpService.updateApprovalStatus(id)
             setStartups((prev) => prev.map(startup => startup.id === id ? { ...startup, isApproved: !startup.isApproved } : startup))
             toast.success(isApproved ? 'Startup denied approval' : 'Start Approved')
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'An error occured. Try again')
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                const resError = error.response?.data?.message || "An error occurred. Retry"
+                console.error(resError);
+                toast.error(resError)
+            } else {
+                console.error("An unexpected error occurred");
+            }
         }
     }
 

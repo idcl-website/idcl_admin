@@ -14,6 +14,7 @@ import ExploreStartUp from "@/components/dashboard/startups";
 import { useEffect, useState } from "react";
 import { startUpService } from "@/services/startup";
 import { toast, Toaster } from "sonner";
+import axios from 'axios';
 
 export interface StartUpInterface {
     id: string,
@@ -107,9 +108,12 @@ export default function Dashboardpage() {
             try {
                 const data = await startUpService.getAllStarups();
                 setStartups(data)
-            } catch (error: any) {
-                const resError = error.response?.data?.message || "An Internal Server Error"
-                toast.error(resError)
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    console.error(error.response?.data?.message || "An error occurred. Retry");
+                } else {
+                    console.error("An unexpected error occurred");
+                }
             } finally {
                 setIsFetching(false)
             }

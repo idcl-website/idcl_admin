@@ -38,6 +38,7 @@ import { LoaderCircle } from 'lucide-react'
 import { startUpService } from "@/services/startup";
 import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
 
+
 export type FounderInterface = {
     name: string,
     position: string,
@@ -295,13 +296,19 @@ export default function CreateStartUpPage() {
                 delete newErrors[fieldName];
                 return newErrors;
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            let errorMessage = 'Validation failed';
+
             if (error instanceof yup.ValidationError) {
-                setFormErrors(prev => ({
-                    ...prev,
-                    [fieldName]: error.message
-                }));
+                errorMessage = error.message;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
+
+            setFounderErrors(prev => ({
+                ...prev,
+                [fieldName]: errorMessage
+            }));
         }
     };
 
@@ -317,13 +324,19 @@ export default function CreateStartUpPage() {
                 delete newErrors[fieldName];
                 return newErrors;
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+            let errorMessage = 'Validation failed';
+
             if (error instanceof yup.ValidationError) {
-                setFounderErrors(prev => ({
-                    ...prev,
-                    [fieldName]: error.message
-                }));
+                errorMessage = error.message;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
+
+            setFounderErrors(prev => ({
+                ...prev,
+                [fieldName]: errorMessage
+            }));
         }
     };
 
@@ -333,7 +346,7 @@ export default function CreateStartUpPage() {
             await startupSchema.validate(data, { abortEarly: false });
             setFormErrors({});
             return true;
-        } catch (error) {
+        } catch (error: unknown) {
             if (error instanceof yup.ValidationError) {
                 const errors: Record<string, string> = {};
                 error.inner.forEach((err) => {
@@ -353,7 +366,7 @@ export default function CreateStartUpPage() {
             await founderSchema.validate(founderData, { abortEarly: false });
             setFounderErrors({});
             return true;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (error instanceof yup.ValidationError) {
                 const errors: Record<string, string> = {};
                 error.inner.forEach((err) => {
@@ -431,8 +444,8 @@ export default function CreateStartUpPage() {
                 setFormData(startupValue)
                 setFounder(FoundersDto)
                 router.push('/admin/dashboard/start-ups');
-            } catch (error: any) {
-                const resError = error.response?.data?.message || 'Network Error'
+            } catch (error: unknown) {
+                const resError = 'Network Error'
                 toast.error(resError);
                 console.log(error)
             } finally {
@@ -542,12 +555,12 @@ export default function CreateStartUpPage() {
                                                         if (file) {
                                                             try {
                                                                 setIsUploadingStartupImage(true)
-                                                                const startupUrl = await uploadToCloudinary(file as any);
+                                                                const startupUrl = await uploadToCloudinary(file);
                                                                 if (startupUrl) setFormData((prev) => ({ ...prev, logo: startupUrl }))
                                                                 toast.success('Photo uploaded successfully')
-                                                            } catch (error: any) {
+                                                            } catch (error: unknown) {
                                                                 console.error(error)
-                                                                toast.error(error.response?.data?.message)
+                                                                toast.error('failed to upload image')
                                                             } finally {
                                                                 setIsUploadingStartupImage(false)
                                                             }
@@ -713,7 +726,7 @@ export default function CreateStartUpPage() {
                                                                 photo: founderUrl
                                                             }))
                                                             toast.success('Photo uploaded successfully')
-                                                        } catch (error) {
+                                                        } catch (error: unknown) {
                                                             toast.error('Failed to upload founder photo');
                                                         } finally {
                                                             setIsUploadingFounderImage(false)

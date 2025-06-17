@@ -38,6 +38,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import axios from "axios";
 
 
 const TalentFilters = [
@@ -71,7 +72,7 @@ export default function TalentPage() {
     const [isfetching, setIsFetching] = useState(true)
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [hasMore, setHasMore] = useState(false);
+    // const [hasMore, setHasMore] = useState(false);
     const [totalTalent, setTotalTalents] = useState(0)
     const [talents, setTalents] = useState<TalentInterface[]>([])
     const [filteredTalents, setFilteredTalents] = useState<TalentInterface[]>([])
@@ -87,12 +88,17 @@ export default function TalentPage() {
                 const data = await TalentService.getAllTalents(currentPage);
                 setFilteredTalents(data.talents)
                 setTalents(data.talents)
-                setHasMore(data.pagination.hasMore)
+                // setHasMore(data.pagination.hasMore)
                 setTotalPages(data.pagination.totalPages)
                 setTotalTalents(data.pagination.total)
-            } catch (error: any) {
-                const resError = error.response?.data?.message || "Check your internet connection. Try again"
-                toast.error(resError)
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    const resError = error.response?.data?.message || "An error occurred. Retry"
+                    console.error(resError);
+                    toast.error(resError)
+                } else {
+                    console.error("An unexpected error occurred");
+                }
             } finally {
                 setIsFetching(false)
             }
@@ -285,10 +291,14 @@ export default function TalentPage() {
                                                             await TalentService.toggleTalentStatus(talent.id)
                                                             setFilteredTalents((prev) => prev.map(item => item.id === talent.id ? { ...item, isApproved: !item.isApproved } : item))
                                                             toast.success('talent have approved')
-                                                        } catch (error: any) {
-                                                            const resError = error.response?.data?.message
-                                                            console.error(resError)
-                                                            toast.error(resError)
+                                                        } catch (error: unknown) {
+                                                            if (axios.isAxiosError(error)) {
+                                                                const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                                console.error(resError);
+                                                                toast.error(resError)
+                                                            } else {
+                                                                console.error("An unexpected error occurred");
+                                                            }
                                                         }
                                                     }}>
                                                         {talent.isApproved ? 'Disapprove' : 'Approve'}

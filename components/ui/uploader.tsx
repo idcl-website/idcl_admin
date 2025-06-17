@@ -3,7 +3,6 @@
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { UploadIcon } from "lucide-react";
-import Image from "next/image";
 
 interface FileUploaderProps {
     accept: string;

@@ -1,7 +1,6 @@
 "use client"
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { FileUploader } from "@/components/ui/file-uploader";
 import { useState } from 'react'
 import { cn } from "@/lib/utils"
@@ -14,6 +13,7 @@ import { useFormik } from 'formik';
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { TalentService } from "@/services/talent";
+import axios from "axios";
 
 export default function AddTalent() {
     const router = useRouter();
@@ -39,9 +39,13 @@ export default function AddTalent() {
                 formik.resetForm();
                 setImageFile(undefined)
                 router.push('/admin/dashboard/talent')
-            } catch (error: any) {
-                console.error('Submission error:', error);
-                toast.error(error.response?.data?.message)
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    console.error(error.response?.data?.message || "An error occurred. Retry");
+                    toast.error(error.response?.data?.message)
+                } else {
+                    console.error("An unexpected error occurred");
+                }
             }
         },
     });
@@ -98,9 +102,14 @@ export default function AddTalent() {
                                                 const ImageUrl = await uploadToCloudinary(file)
                                                 console.log(ImageUrl)
                                                 if (ImageUrl) setImageFile(ImageUrl)
-                                            } catch (error: any) {
-                                                console.error(error.response?.data?.message)
-                                                toast.error(error.response?.data?.message)
+                                            } catch (error: unknown) {
+                                                if (axios.isAxiosError(error)) {
+                                                    const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                    console.error(resError);
+                                                    toast.error(resError)
+                                                } else {
+                                                    console.error("An unexpected error occurred");
+                                                }
                                             } finally {
                                                 setIsUploading(false)
                                             }

@@ -11,7 +11,6 @@ interface AsideViewProps {
 
 export default function AsideView({ isMobileOpen, onClose }: AsideViewProps) {
     const [isMobile, setIsMobile] = useState(false);
-    const pathname = usePathname();
 
     useEffect(() => {
         const handleResize = () => {

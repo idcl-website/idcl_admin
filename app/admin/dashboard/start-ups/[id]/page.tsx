@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { startUpService } from "@/services/startup";
+import axios from 'axios';
 
 const founders = [
     {
@@ -31,14 +32,14 @@ const founders = [
             },
         ]
     },
-    // ... (keep other founder objects the same)
+
 ]
 
 const Crises = {
     Access: {
         list: [
             'Over 60% of rural communities in Northern Nigeria lack access to basic healthcare.',
-            'Patients travel 10–30km to see a doctor, often by foot or motorcycle.',
+            'Patients travel 1030km to see a doctor, often by foot or motorcycle.',
             'Preventable diseases remain untreated due to distance and cost barriers.'
         ]
     },
@@ -89,8 +90,12 @@ export default function StartUpProfile() {
                     support: data.support,
                     founderstory: data.story
                 })
-            } catch (error: any) {
-                console.error(error.response?.data?.message || "An error occurred. Retry")
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    console.error(error.response?.data?.message || "An error occurred. Retry");
+                } else {
+                    console.error("An unexpected error occurred");
+                }
             }
         }
         startup();
