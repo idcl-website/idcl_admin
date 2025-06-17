@@ -1,6 +1,6 @@
 import { usePathname } from 'next/navigation';
 
-export default function DynamicSVGIcon({ svg }: { svg: any }) {
+export default function DynamicSVGIcon() {
     const pathname = usePathname();
     const getFillColor = () => {
         if (pathname === '/home') return '#FF0000';

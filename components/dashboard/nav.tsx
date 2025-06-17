@@ -1,9 +1,7 @@
 import StartupIcon from "@/assets/icons/startup"
 import TalentupIcon from "@/assets/icons/talent"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from 'next/navigation'
-import DynamicSVGIcon from './svg'
 
 export const items = [
     {

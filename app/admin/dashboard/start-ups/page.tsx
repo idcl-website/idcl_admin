@@ -4,15 +4,6 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import StarupSkelenton from "@/skeletons/startup";
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
-import {
     Select,
     SelectContent,
     SelectItem,
@@ -205,24 +196,6 @@ export default function Dashboardpage() {
                         <ExploreStartUp key={index} {...item} setStartups={setStartups} />
                     ))}
                 </div>
-
-                {/* Pagination - You can implement this when needed */}
-                {/* <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationEllipsis />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination> */}
             </div>
         </>
     )

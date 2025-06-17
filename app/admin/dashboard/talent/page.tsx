@@ -11,13 +11,11 @@ import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import talent from '@/assets/images/talent.png'
 import Image from "next/image";
 import more from '@/assets/icons/more.svg'
 import { useRouter } from "next/navigation";
@@ -38,11 +36,9 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from "next/link";
+
 
 const TalentFilters = [
     {
@@ -131,7 +127,7 @@ export default function TalentPage() {
         }
 
         setFilteredTalents(results)
-    }, [searchQuery, filters])
+    }, [searchQuery, filters, talents])
 
     const handleFilterChange = (filterType: string, value: string) => {
         setfilters(prev => ({

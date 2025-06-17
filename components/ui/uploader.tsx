@@ -46,7 +46,6 @@ export function Uploader({
         >
             <input {...getInputProps()} id="file-upload-input" />
             <UploadIcon className="h-6 w-6 text-muted-foreground" />
-            {/* <Image src='/images/partnership/upload.png' width={68} height={59} priority className="object-cover" alt="upload" /> */}
             <p className="mt-2 text-sm text-muted-foreground text-center">
                 {isDragActive ? (
                     "Drop the files here"

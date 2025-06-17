@@ -5,7 +5,6 @@ import facebook from "@/assets/icons/Facebook.png"
 import twiter from "@/assets/icons/Twitter.png"
 import instagram from "@/assets/icons/Instagram.png"
 import founder from "@/assets/images/founder.png"
-import logo from "@/assets/images/image.png"
 import back from "@/assets/icons/back.svg"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

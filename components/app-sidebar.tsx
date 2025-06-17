@@ -1,4 +1,3 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 import startup from '@/assets/icons/startup.svg'
 import talent from '@/assets/icons/talent.svg'
 import Link from "next/link"
@@ -14,7 +13,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import AppLogo from "./general/logo"
 import DashboardLogo from "./general/dashlogo"
 
 // Menu items.
