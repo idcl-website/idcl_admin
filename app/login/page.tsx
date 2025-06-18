@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Login failed');
+        setError('Login failed. Retry');
       }
     } finally {
       setLoading(false);
