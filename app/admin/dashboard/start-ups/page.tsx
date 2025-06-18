@@ -112,7 +112,7 @@ export default function Dashboardpage() {
                 if (axios.isAxiosError(error)) {
                     console.error(error.response?.data?.message || "An error occurred. Retry");
                 } else {
-                    console.error("An unexpected error occurred");
+                    console.error("An unexpected error occurred, Try again");
                 }
             } finally {
                 setIsFetching(false)
