@@ -413,10 +413,10 @@ export default function CreateStartUpPage() {
 
     const handleAddFounder = async () => {
 
-        if (!founder.photo) {
-            toast.error('Please upload a founder photo');
-            return;
-        }
+        // if (!founder.photo) {
+        //     toast.error('Please upload a founder photo');
+        //     return;
+        // }
 
         const isValid = await validateFounderForm(founder);
         if (isValid) {
