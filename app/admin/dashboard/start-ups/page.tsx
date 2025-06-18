@@ -122,6 +122,7 @@ export default function Dashboardpage() {
     }, [])
 
     if (isFetching) return <StarupSkelenton />
+    if (!startups.length) return <p>No startup found</p>
 
     return (
         <>
@@ -196,9 +197,13 @@ export default function Dashboardpage() {
 
                 {/* Startups Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-[39px]">
-                    {filteredStartups.map((item, index) => (
+                    {filteredStartups.length > 0 ? (filteredStartups.map((item, index) => (
                         <ExploreStartUp key={index} {...item} setStartups={setStartups} />
-                    ))}
+                    ))) : (
+                        <p className="text-red-500 font-medium">
+                            No startups found matching your search criteria
+                        </p>
+                    )}
                 </div>
             </div>
         </>
