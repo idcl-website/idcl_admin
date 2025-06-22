@@ -6,7 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Search, Eye, Signature, Trash2, SquarePen, Loader2 } from "lucide-react";
+import { Search, Eye, Trash2, SquarePen, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Dialog,
@@ -31,12 +31,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Label } from "@/components/ui/label";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { useFormik } from "formik";
 import axios from "axios";
 import { blogService } from "@/services/blog";
 import {
@@ -47,6 +42,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+import { blogSchema } from "@/validation/blog";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 
 const TalentFilters = [
@@ -80,6 +78,7 @@ export default function TalentPage() {
         isediting: false
     })
     const [openDialogId, setOpenDialogId] = useState<string | null>(null);
+    const [openEditDialogId, setOpenEditDialogId] = useState<string | null>(null);
     const [totalBlogs, setTotalBlog] = useState(0)
     const [blogs, setBlogs] = useState<Blogs[]>([])
     const [filteredBlogs, setFilteredBlogs] = useState<Blogs[]>([])
@@ -151,6 +150,61 @@ export default function TalentPage() {
         }));
     }
 
+
+    const editFormik = useFormik({
+        initialValues: {
+            title: '',
+            snippet: '',
+            body: '',
+            location: ''
+        },
+        validationSchema: blogSchema,
+        onSubmit: async (values) => {
+            if (!openEditDialogId) {
+                toast.error('No blog selected for editing');
+                return;
+            }
+
+            try {
+                setIsLoadings(prev => ({ ...prev, isediting: true }));
+                await blogService.updateBlog(openEditDialogId, values);
+                setFilteredBlogs(prev => prev.map(blog =>
+                    blog._id === openEditDialogId ? { ...blog, ...values } : blog
+                ));
+                toast.success('Blog updated successfully');
+                setOpenEditDialogId(null);
+            } catch (error: unknown) {
+                if (axios.isAxiosError(error)) {
+                    toast.error(error.response?.data?.message || "Failed to update blog");
+                } else {
+                    toast.error("An unexpected error occurred");
+                }
+            } finally {
+                setIsLoadings(prev => ({ ...prev, isediting: false }));
+            }
+        },
+    });
+
+    // Reset form when dialog closes
+    useEffect(() => {
+        if (!openEditDialogId) {
+            editFormik.resetForm();
+        }
+    }, [openEditDialogId]);
+
+    useEffect(() => {
+        if (openEditDialogId) {
+            const blog = blogs.find(b => b._id === openEditDialogId);
+            if (blog) {
+                editFormik.setValues({
+                    title: blog.title,
+                    snippet: blog.snippet,
+                    body: blog.body,
+                    location: blog.location
+                });
+            }
+        }
+    }, [openEditDialogId, blogs]);
 
     if (isfetching) {
         return <TalentPageSkeleton />
@@ -240,7 +294,7 @@ export default function TalentPage() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto px-4 py-6">
+                <div className=" px-4 py-6">
                     {filteredBlogs.length === 0 ? (
                         <div className="w-full text-center text-gray-500 text-sm sm:text-base">
                             No news articles match your search or filters.
@@ -248,9 +302,9 @@ export default function TalentPage() {
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
-                                <Card key={index} className="w-full relative h-[580px] sm:min-h-[650px]">
+                                <Card key={index} className="w-full relative h-[750px] hover:shadow-2xl transition-shadow sm:min-h-[850px]">
                                     <CardHeader>
-                                        <Image src={news.image} width={100} height={40} alt='news-photo' priority className="w-full" />
+                                        <Image src={news.image} width={80} height={30} alt='news-photo' priority className="w-full rounded-md hover:scale-103 transition-transform duration-300 " />
                                         <CardTitle className="mb-4">{news.title}</CardTitle>
                                         <CardDescription>
                                             <p className="line-clamp-4 sm:line-clamp-6 text-justify text-gray-400">
@@ -308,9 +362,126 @@ export default function TalentPage() {
                                                     <Trash2 className="text-white group-hover:text-red-500" />
                                                 )}
                                             </button>
-                                            <button className="bg-blue-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-blue-500 hover:bg-transparent transition-all">
-                                                <SquarePen className="text-white group-hover:text-blue-500" />
-                                            </button>
+                                            <Dialog
+                                                open={openEditDialogId === news._id}
+                                                onOpenChange={(Open) => {
+                                                    setOpenEditDialogId(Open ? news._id : null)
+                                                }}
+                                            >
+                                                <DialogTrigger asChild>
+                                                    <button className="bg-blue-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-blue-500 hover:bg-transparent transition-all">
+                                                        <SquarePen className="text-white group-hover:text-blue-500" />
+                                                    </button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-h-[90vh] overflow-auto">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Edit News</DialogTitle>
+                                                        <DialogDescription>
+                                                            Make all necessary changes before submitting
+                                                        </DialogDescription>
+                                                        <form onSubmit={editFormik.handleSubmit} className="w-full">
+                                                            <div className="w-full grid grid-cols-1 gap-2">
+                                                                {/* Name Field */}
+                                                                <div className={cn("gap-1.5 mb-4")}>
+                                                                    <Label htmlFor='title'>Title</Label>
+                                                                    <Input
+                                                                        type='text'
+                                                                        id='title'
+                                                                        name='title'
+                                                                        placeholder='enter title'
+                                                                        className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                        value={editFormik.values.title}
+                                                                        onChange={editFormik.handleChange}
+                                                                        onBlur={editFormik.handleBlur}
+                                                                    />
+                                                                    {editFormik.touched.title && editFormik.errors.title && (
+                                                                        <p className="text-red-500 text-xs mt-1">{editFormik.errors.title}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className={cn("gap-1.5 mb-4")}>
+                                                                    <Label htmlFor='location'>Location</Label>
+                                                                    <Input
+                                                                        type='text'
+                                                                        id='location'
+                                                                        name='location'
+                                                                        placeholder='Enter location'
+                                                                        className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                        value={editFormik.values.location}
+                                                                        onChange={editFormik.handleChange}
+                                                                        onBlur={editFormik.handleBlur}
+                                                                    />
+                                                                    {editFormik.touched.location && editFormik.errors.location && (
+                                                                        <p className="text-red-500 text-xs mt-1">{editFormik.errors.location}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Email Field */}
+                                                                <div className={cn("gap-1.5 mb-4")}>
+                                                                    <Label htmlFor='snippet'>Snippet</Label>
+                                                                    <Textarea
+                                                                        id='snippet'
+                                                                        name='snippet'
+                                                                        placeholder='enter tagline for news'
+                                                                        value={editFormik.values.snippet}
+                                                                        onChange={editFormik.handleChange}
+                                                                        onBlur={editFormik.handleBlur}
+                                                                        className={cn(
+                                                                            "w-full min-h-[100px] sm:min-h-[110px] lg:min-h-[120px] text-sm sm:text-[15px] lg:text-[16px]",
+                                                                            editFormik.errors.snippet && "border-red-500"
+                                                                        )}
+                                                                    />
+                                                                    {editFormik.touched.snippet && editFormik.errors.snippet && (
+                                                                        <p className="text-red-500 text-xs mt-1">{editFormik.errors.snippet}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className={cn("gap-1.5 mb-4")}>
+                                                                    <Label htmlFor='body'>body</Label>
+                                                                    <Textarea
+                                                                        id='body'
+                                                                        name='body'
+                                                                        placeholder='enter blog contents'
+                                                                        value={editFormik.values.body}
+                                                                        onChange={editFormik.handleChange}
+                                                                        onBlur={editFormik.handleBlur}
+                                                                        className={cn(
+                                                                            "w-full min-h-[100px] sm:min-h-[110px] lg:min-h-[120px] text-sm sm:text-[15px] lg:text-[16px]",
+                                                                            editFormik.errors.body && "border-red-500"
+                                                                        )}
+
+                                                                    />
+                                                                    {editFormik.touched.body && editFormik.errors.body && (
+                                                                        <p className="text-red-500 text-xs mt-1">{editFormik.errors.body}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-end mt-6">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setOpenEditDialogId(null)}
+                                                                    className="flex py-[10px] px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc] transition-colors"
+                                                                >
+                                                                    <p className="font-figtree font-semibold text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                                                        Cancel
+                                                                    </p>
+                                                                </button>
+                                                                <button
+                                                                    type="submit"
+                                                                    disabled={editFormik.isSubmitting || !editFormik.isValid}
+                                                                    className="flex py-[10px] px-[24px] items-center justify-center gap-2 bg-[#005DFF] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] rounded-[50px] w-full sm:w-auto hover:bg-[#004acc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    <p className="font-figtree font-semibold text-[18px] text-[#fff] leading-[24px]">
+                                                                        {editFormik.isSubmitting ? 'Updating...' : 'Update'}
+                                                                    </p>
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </DialogHeader>
+                                                </DialogContent>
+                                            </Dialog>
+
                                         </div>
                                     </CardFooter>
                                 </Card>

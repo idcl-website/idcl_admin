@@ -2,9 +2,10 @@ import { axiosInstance } from "@/lib/utils";
 
 interface CreateBlog {
     title: string,
-    image: string,
+    image?: string,
     snippet: string,
-    body: string
+    body: string,
+    location: string
 }
 
 
@@ -25,8 +26,12 @@ export const blogService = {
     },
 
     deleteBlog: async (id: string) => {
-        console.log(id)
         const response = await axiosInstance.delete(`/admin/blog/delete/${id}`)
+        return response.data;
+    },
+
+    updateBlog: async (id: string, data: CreateBlog) => {
+        const response = await axiosInstance.patch(`/admin/blog/update/${id}`, data)
         return response.data;
     }
 
