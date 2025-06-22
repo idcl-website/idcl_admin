@@ -9,16 +9,14 @@ import {
 import { Search, Eye, Signature, Trash2, SquarePen, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import Image from "next/image";
-import more from '@/assets/icons/more.svg'
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import TalentPageSkeleton from "@/skeletons/talent";
 import { useEffect, useState } from "react";
@@ -81,6 +79,7 @@ export default function TalentPage() {
         isdeleting: false,
         isediting: false
     })
+    const [openDialogId, setOpenDialogId] = useState<string | null>(null);
     const [totalBlogs, setTotalBlog] = useState(0)
     const [blogs, setBlogs] = useState<Blogs[]>([])
     const [filteredBlogs, setFilteredBlogs] = useState<Blogs[]>([])
@@ -249,7 +248,7 @@ export default function TalentPage() {
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
-                                <Card key={index} className="w-full">
+                                <Card key={index} className="w-full relative h-[580px] sm:min-h-[650px]">
                                     <CardHeader>
                                         <Image src={news.image} width={100} height={40} alt='news-photo' priority className="w-full" />
                                         <CardTitle className="mb-4">{news.title}</CardTitle>
@@ -263,8 +262,29 @@ export default function TalentPage() {
                                         <p className="line-clamp-6 sm:line-clamp-10 text-justify text-gray-500">{news.body}</p>
                                         <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
                                     </CardContent>
-                                    <CardFooter className="flex items-center justify-between">
-                                        <button className="bg-green-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-green-500 hover:bg-transparent transition-all"><Eye className="text-white group-hover:text-green-500" /></button>
+                                    <CardFooter className="flex items-center justify-between absolute bottom-2 w-full ">
+                                        <Dialog
+                                            open={openDialogId === news._id}
+                                            onOpenChange={(open) => {
+                                                setOpenDialogId(open ? news._id : null);
+                                            }}
+                                        >
+                                            <DialogTrigger asChild>
+                                                <button className="bg-green-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-green-500 hover:bg-transparent transition-all"><Eye className="text-white group-hover:text-green-500" /></button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-h-[80vh] overflow-auto">
+                                                <DialogHeader>
+                                                    <DialogTitle className="flex flex-col items-start gap-4">
+                                                        <Image src={news.image} alt='news-image' width={100} height={40} priority />
+                                                        <p className="text-justify underline">{news.title}</p>
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        <p className="text-justify">{news.snippet}</p>
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <p className="text-justify">{news.body}</p>
+                                            </DialogContent>
+                                        </Dialog>
                                         <div className="flex items-center gap-4">
                                             <button
                                                 onClick={async () => {
@@ -294,6 +314,7 @@ export default function TalentPage() {
                                         </div>
                                     </CardFooter>
                                 </Card>
+
                             ))}
                         </div>
                     )}
