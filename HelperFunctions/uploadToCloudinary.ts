@@ -1,5 +1,5 @@
 export const uploadToCloudinary = async (file: File): Promise<string | void> => {
-
+    console.log('uploading the blog')
     try {
         const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME;
         const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET;

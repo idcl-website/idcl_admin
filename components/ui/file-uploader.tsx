@@ -34,9 +34,7 @@ export function FileUploader({
 
     return (
         <div
-            {...getRootProps({
-                onClick: (e) => e.stopPropagation(),
-            })}
+            {...getRootProps()}
             className={cn(
                 "flex flex-col items-center bg-[#F8F8FF] justify-center rounded-lg border border-dashed p-6 cursor-pointer transition-colors",
                 isDragActive

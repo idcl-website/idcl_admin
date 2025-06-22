@@ -14,6 +14,11 @@ export const items = [
         url: "/admin/dashboard/talent",
         icon: TalentupIcon,
     },
+    {
+        title: "Blogs",
+        url: "/admin/dashboard/blog",
+        icon: TalentupIcon,
+    },
 ]
 
 export default function AdminNavigation() {
