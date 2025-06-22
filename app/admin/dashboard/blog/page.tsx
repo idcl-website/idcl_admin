@@ -314,7 +314,14 @@ export default function TalentPage() {
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-4">
                                         <p className="line-clamp-6 sm:line-clamp-10 text-justify text-gray-500">{news.body}</p>
-                                        <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
+                                            <div className="flex items-center gap-4">
+                                                <p className="text-gray-400">{news.createdAt}</p>
+                                                <p className="text-gray-400">{news.time}</p>
+                                            </div>
+                                        </div>
+
                                     </CardContent>
                                     <CardFooter className="flex items-center justify-between absolute bottom-2 w-full ">
                                         <Dialog
