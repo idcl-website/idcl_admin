@@ -12,5 +12,9 @@ export const blogSchema = yup.object().shape({
     body: yup
         .string()
         .required('body is required')
-        .min(20, 'Track must be at least 2 characters')
+        .min(20, 'Track must be at least 2 characters'),
+    location: yup
+        .string()
+        .required('location is required')
+        .min(2, 'Track must be at least 2 characters'),
 });
