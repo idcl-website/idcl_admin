@@ -247,7 +247,7 @@ export default function TalentPage() {
                             No news articles match your search or filters.
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
                                 <Card key={index} className="w-full">
                                     <CardHeader>
@@ -259,35 +259,39 @@ export default function TalentPage() {
                                             </p>
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="flex flex-col gap-4">
                                         <p className="line-clamp-6 sm:line-clamp-10 text-justify text-gray-500">{news.body}</p>
+                                        <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
                                     </CardContent>
-                                    <CardFooter className="justify-end gap-4">
-                                        <button
-                                            onClick={async () => {
-                                                try {
-                                                    setIsLoadings(prev => ({ ...prev, isdeleting: true }));
-                                                    await blogService.deleteBlog(news._id);
-                                                    setFilteredBlogs(prev => prev.filter(item => item._id !== news._id));
-                                                    setTotalBlog(prev => prev - 1);
-                                                    toast.success('News successfully deleted');
-                                                } catch (error) {
-                                                    toast.error('Failed to delete');
-                                                } finally {
-                                                    setIsLoadings(prev => ({ ...prev, isdeleting: false }));
-                                                }
-                                            }}
-                                            className="bg-red-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-red-500 hover:bg-transparent transition-all"
-                                        >
-                                            {isloadings.isdeleting ? (
-                                                <Loader2 className="animate-spin text-white group-hover:text-red-500" />
-                                            ) : (
-                                                <Trash2 className="text-white group-hover:text-red-500" />
-                                            )}
-                                        </button>
-                                        <button className="bg-blue-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-blue-500 hover:bg-transparent transition-all">
-                                            <SquarePen className="text-white group-hover:text-blue-500" />
-                                        </button>
+                                    <CardFooter className="flex items-center justify-between">
+                                        <button className="bg-green-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-green-500 hover:bg-transparent transition-all"><Eye className="text-white group-hover:text-green-500" /></button>
+                                        <div className="flex items-center gap-4">
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        setIsLoadings(prev => ({ ...prev, isdeleting: true }));
+                                                        await blogService.deleteBlog(news._id);
+                                                        setFilteredBlogs(prev => prev.filter(item => item._id !== news._id));
+                                                        setTotalBlog(prev => prev - 1);
+                                                        toast.success('News successfully deleted');
+                                                    } catch (error) {
+                                                        toast.error('Failed to delete');
+                                                    } finally {
+                                                        setIsLoadings(prev => ({ ...prev, isdeleting: false }));
+                                                    }
+                                                }}
+                                                className="bg-red-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-red-500 hover:bg-transparent transition-all"
+                                            >
+                                                {isloadings.isdeleting ? (
+                                                    <Loader2 className="animate-spin text-white group-hover:text-red-500" />
+                                                ) : (
+                                                    <Trash2 className="text-white group-hover:text-red-500" />
+                                                )}
+                                            </button>
+                                            <button className="bg-blue-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-blue-500 hover:bg-transparent transition-all">
+                                                <SquarePen className="text-white group-hover:text-blue-500" />
+                                            </button>
+                                        </div>
                                     </CardFooter>
                                 </Card>
                             ))}
