@@ -349,6 +349,7 @@ export default function TalentPage() {
                                                         setTotalBlog(prev => prev - 1);
                                                         toast.success('News successfully deleted');
                                                     } catch (error) {
+                                                        console.error(error)
                                                         toast.error('Failed to delete');
                                                     } finally {
                                                         setIsLoadings(prev => ({ ...prev, isdeleting: false }));

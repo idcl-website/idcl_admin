@@ -85,12 +85,13 @@ export default function CreateBlog() {
                                 )}
 
                                 {!isUploading && imageFile && (
-                                    <img
+                                    <Image
                                         src={imageFile}
                                         alt="start-up logo"
                                         className="object-contain rounded-lg"
                                         width={100}
                                         height={50}
+                                        priority
                                     />
                                 )}
                             </div>
