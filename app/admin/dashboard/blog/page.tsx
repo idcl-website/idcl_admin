@@ -55,6 +55,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { formateDate } from "@/HelperFunctions/convertDate";
+import { BlogSkeleton } from "@/skeletons/blog";
 
 
 
@@ -143,12 +144,6 @@ export default function TalentPage() {
             results = results.filter((blog) => blog.createdAt === formateDate(date))
         }
 
-        // if (filters.batch !== 'all') {
-        //     results = results.filter((talent) =>
-        //         talent.fullYear.toString() === filters.batch
-        //     )
-        // }
-
         setFilteredBlogs(results)
     }, [filters, date, blogs])
 
@@ -216,7 +211,7 @@ export default function TalentPage() {
     }, [openEditDialogId, blogs]);
 
     if (isfetching) {
-        return <TalentPageSkeleton />
+        return <BlogSkeleton />
     }
 
     return (
