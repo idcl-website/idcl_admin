@@ -550,6 +550,8 @@ export default function TalentPage() {
                                     aria-disabled={currentPage === totalPages}
                                     className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}
                                 />
+                                {`${currentPage} of ${totalPages} ${totalPages > 1 ? 'pages' : 'page'}`}
+
                             </PaginationItem>
                         </PaginationContent>
                     </Pagination>
