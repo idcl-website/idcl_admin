@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -56,13 +57,13 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && pathname !== '/login') {
-      router.replace('/login');
+    if (!loading && !isAuthenticated && pathname !== '/') {
+      router.replace('/');
     }
   }, [isAuthenticated, loading, router, pathname]);
 
   if (loading || (!isAuthenticated && pathname !== '/login')) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className='animate-spin text-blue-500 w-10 h-10' /></div>;
   }
   return <>{children}</>;
 } 

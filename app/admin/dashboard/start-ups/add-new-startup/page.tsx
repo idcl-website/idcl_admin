@@ -288,11 +288,10 @@ export default function CreateStartUpPage() {
     // Validate individual field
     const validateField = async (fieldName: keyof startupDto, value: unknown) => {
         try {
-            // Create a partial object with just the field we want to validate
             const partialData = { [fieldName]: value };
             await startupSchema.validateAt(fieldName, partialData);
 
-            setFormErrors(prev => {
+            setFormErrors(prev => {  // Changed from setFounderErrors to setFormErrors
                 const newErrors = { ...prev };
                 delete newErrors[fieldName];
                 return newErrors;
@@ -306,7 +305,7 @@ export default function CreateStartUpPage() {
                 errorMessage = error.message;
             }
 
-            setFounderErrors(prev => ({
+            setFormErrors(prev => ({
                 ...prev,
                 [fieldName]: errorMessage
             }));
@@ -656,15 +655,7 @@ export default function CreateStartUpPage() {
                                 )}
 
                                 <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
-                                    <button
-                                        type="button"
-                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
-                                        onClick={() => setOpenDialog(true)}
-                                    >
-                                        <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
-                                            Add founders ({formdata.founders.length})
-                                        </p>
-                                    </button>
+
                                     <button
                                         type="submit"
                                         disabled={formdata.founders.length < 1 || isSubmitting}
@@ -687,6 +678,17 @@ export default function CreateStartUpPage() {
                     </div>
                 </section>
             </main>
+
+            <button
+                type="button"
+                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
+                onClick={() => setOpenDialog(true)}
+            >
+                <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                    Add founders ({formdata.founders.length})
+                </p>
+            </button>
+
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogContent className="max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl">
                     <DialogHeader className="max-h-[80vh] overflow-y-auto scrollbar-hide">
@@ -720,10 +722,12 @@ export default function CreateStartUpPage() {
                                         <>
                                             <Uploader
                                                 accept="image/*"
-                                                maxSize={5 * 1024 * 1024}
+                                                maxSize={2 * 1024 * 1024}
                                                 onDrop={async (files) => {
+                                                    console.log('Files received:', files)
                                                     const file = files[0];
                                                     if (file) {
+                                                        console.log('Starting upload...');
                                                         setIsUploadingFounderImage(true)
                                                         try {
                                                             const founderUrl = await uploadToCloudinary(file);
