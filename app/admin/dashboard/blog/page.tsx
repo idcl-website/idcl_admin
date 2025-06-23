@@ -6,7 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Search, Eye, Trash2, SquarePen, Loader2 } from "lucide-react";
+import { Search, Eye, Trash2, SquarePen, Loader2, CircleX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Dialog,
@@ -45,6 +45,17 @@ import {
 import { blogSchema } from "@/validation/blog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { format, previousDay } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { formateDate } from "@/HelperFunctions/convertDate";
+
 
 
 const TalentFilters = [
@@ -82,6 +93,7 @@ export default function TalentPage() {
     const [totalBlogs, setTotalBlog] = useState(0)
     const [blogs, setBlogs] = useState<Blogs[]>([])
     const [filteredBlogs, setFilteredBlogs] = useState<Blogs[]>([])
+    const [date, setDate] = useState<Date>()
     const [filters, setfilters] = useState({
         search: '',
         time: 'all',
@@ -127,13 +139,9 @@ export default function TalentPage() {
             )
         }
 
-        // if (filters.sort !== 'all') {
-        //     results = results.filter((talent) => {
-        //         if (filters.sort === 'Approved') return talent.isApproved
-        //         if (filters.sort === 'Pending') return !talent.isApproved
-        //         return true;
-        //     })
-        // }
+        if (date !== undefined) {
+            results = results.filter((blog) => blog.createdAt === formateDate(date))
+        }
 
         // if (filters.batch !== 'all') {
         //     results = results.filter((talent) =>
@@ -142,7 +150,7 @@ export default function TalentPage() {
         // }
 
         setFilteredBlogs(results)
-    }, [filters, blogs])
+    }, [filters, date, blogs])
 
     const handleFilterChange = (filterType: string, value: string) => {
         setfilters(prev => ({
@@ -231,57 +239,26 @@ export default function TalentPage() {
 
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-[10px]">
-                    <div className="w-full sm:w-auto min-w-[160px] h-[35px] rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
+                    <div className="w-full sm:w-auto min-w-[160px] h-auto rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
                         <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
                             Date
                         </p>
-
-                        <Select
-                        >
-                            <SelectTrigger className="w-full h-[25px] rounded-sm md:rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent
-                                className="rounded-2xl md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
-                                position="popper"
-                                align="end"
-                            >
-                                <SelectItem
-                                    value='29/23/2022'
-                                    className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    data-empty={!date}
+                                    className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal border-none"
                                 >
-                                    Date
-                                </SelectItem>
-
-                            </SelectContent>
-                        </Select>
+                                    {date ? <button onClick={() => setDate(undefined)}><CircleX /></button> : <CalendarIcon />}
+                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar mode="single" selected={date} onSelect={setDate} />
+                            </PopoverContent>
+                        </Popover>
                     </div>
-                    <div className="w-full sm:w-auto min-w-[160px] h-[35px] rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
-                        <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
-                            Time
-                        </p>
-
-                        <Select
-                        >
-                            <SelectTrigger className="w-full h-[25px] rounded-sm md:rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent
-                                className="rounded-2xl md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
-                                position="popper"
-                                align="end"
-                            >
-                                <SelectItem
-                                    value='06.000am'
-                                    className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
-                                >
-                                    Time
-                                </SelectItem>
-
-                            </SelectContent>
-                        </Select>
-                    </div>
-
                 </div>
             </aside>
 
