@@ -82,10 +82,10 @@ export default function TalentPage() {
     const [totalBlogs, setTotalBlog] = useState(0)
     const [blogs, setBlogs] = useState<Blogs[]>([])
     const [filteredBlogs, setFilteredBlogs] = useState<Blogs[]>([])
-    const [searchQuery, setSearchQuery] = useState('')
     const [filters, setfilters] = useState({
-        sort: 'all',
-        batch: 'all'
+        search: '',
+        time: 'all',
+        date: 'all'
     })
 
     useEffect(() => {
@@ -118,11 +118,12 @@ export default function TalentPage() {
     useEffect(() => {
         let results = [...blogs]
 
-        if (searchQuery) {
-            results = results.filter((talent) =>
-                talent.snippet.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                talent.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                talent.body.toLowerCase().includes(searchQuery.toLowerCase())
+        if (filters.search) {
+            results = results.filter((blog) =>
+                blog.snippet.toLowerCase().includes(filters.search.toLowerCase()) ||
+                blog.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+                blog.body.toLowerCase().includes(filters.search.toLowerCase()) ||
+                blog.location.toLowerCase().includes(filters.search.toLowerCase())
             )
         }
 
@@ -215,49 +216,72 @@ export default function TalentPage() {
             {/* Search and Filters Section */}
             <aside className="w-full flex flex-col sm:flex-row gap-3 md:gap-[20px] items-stretch sm:items-center py-2 md:py-[6px] px-3 md:px-[12px] bg-white rounded-lg md:rounded-[10px]">
                 {/* Search Input */}
-                <div className="relative w-full md:max-w-[766px]">
+                <div className="relative w-full md:max-w-[700px]">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder="Search"
                         className="pl-10 rounded-2xl md:rounded-[16px] w-full bg-white"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={filters.search}
+                        onChange={(e) => setfilters((prev) => ({
+                            ...prev,
+                            search: e.target.value
+                        }))}
                     />
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-[10px]">
-                    {TalentFilters.map((filter, index) => (
-                        <div key={index} className="w-full sm:w-auto min-w-[160px] h-[35px] rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
-                            <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
-                                {filter.title}
-                            </p>
+                    <div className="w-full sm:w-auto min-w-[160px] h-[35px] rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
+                        <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
+                            Date
+                        </p>
 
-                            <Select
-                                value={filters[filter.title as keyof typeof filters]}
-                                onValueChange={(value) => handleFilterChange(filter.title, value)}
+                        <Select
+                        >
+                            <SelectTrigger className="w-full h-[25px] rounded-sm md:rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent
+                                className="rounded-2xl md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
+                                position="popper"
+                                align="end"
                             >
-                                <SelectTrigger className="w-full h-[25px] rounded-sm md:rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent
-                                    className="rounded-2xl md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
-                                    position="popper"
-                                    align="end"
+                                <SelectItem
+                                    value='29/23/2022'
+                                    className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
                                 >
-                                    {filter.options.map((option, optionIndex) => (
-                                        <SelectItem
-                                            key={optionIndex}
-                                            value={option.toString()}
-                                            className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
-                                        >
-                                            {option}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    ))}
+                                    Date
+                                </SelectItem>
+
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="w-full sm:w-auto min-w-[160px] h-[35px] rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
+                        <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
+                            Time
+                        </p>
+
+                        <Select
+                        >
+                            <SelectTrigger className="w-full h-[25px] rounded-sm md:rounded-[4px] bg-[#fff] flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent
+                                className="rounded-2xl md:rounded-[16px] border border-[#D0D5DD] bg-[#E1ECFF] w-[var(--radix-select-trigger-width)] min-w-[120px]"
+                                position="popper"
+                                align="end"
+                            >
+                                <SelectItem
+                                    value='06.000am'
+                                    className="font-inter font-medium text-xs md:text-[10px] focus:bg-[#D0D5DD]"
+                                >
+                                    Time
+                                </SelectItem>
+
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                 </div>
             </aside>
 
