@@ -298,10 +298,10 @@ export default function TalentPage() {
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
-                                <Card key={index} className="w-full relative h-[750px] hover:shadow-2xl transition-shadow sm:min-h-[850px]">
+                                <Card key={index} className="w-full relative h-[750px] hover:shadow-2xl transition-shadow sm:min-h-[750px]">
                                     <CardHeader>
                                         <Image src={news.image} width={80} height={30} alt='news-photo' priority className="w-full rounded-md hover:scale-103 transition-transform duration-300 " />
-                                        <CardTitle className="mb-4">{news.title}</CardTitle>
+                                        <CardTitle className="mb-4 line-clamp-1 sm:line-clamp-2">{news.title}</CardTitle>
                                         <CardDescription>
                                             <p className="line-clamp-4 sm:line-clamp-6 text-justify text-gray-400">
                                                 {news.snippet}
@@ -309,7 +309,7 @@ export default function TalentPage() {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-4">
-                                        <p className="line-clamp-6 sm:line-clamp-10 text-justify text-gray-500">{news.body}</p>
+                                        <p className="line-clamp-6 sm:line-clamp-7 text-justify text-gray-500">{news.body}</p>
                                         <div className="flex items-center justify-between">
                                             <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
                                             <div className="flex items-center gap-4">
