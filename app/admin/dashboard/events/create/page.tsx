@@ -68,7 +68,7 @@ export default function CreateEvent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
-    const handleChange = (field: string, value: any) => {
+    const handleChange = (field: string, value: unknown) => {
         setForm((prev) => ({ ...prev, [field]: value }));
         setErrors((prev) => ({ ...prev, [field]: "" }));
     };

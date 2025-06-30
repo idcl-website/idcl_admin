@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { format } from 'date-fns';
 
 type EventItem = {
     image: string;
@@ -12,7 +11,7 @@ type EventItem = {
     time: string;
 };
 
-export default function EventDisplay({ image, name, description, tagline, category, day, month, time }: EventItem) {
+export default function EventDisplay({ image, name, description, tagline, day, month, time }: EventItem) {
     return (
         <div className="w-full max-w-[362px] h-[430px] mx-auto flex flex-col items-center bg-white rounded-[18px] shadow border border-[#E1ECFF] overflow-hidden">
             {/* Image Container */}
