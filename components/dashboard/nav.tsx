@@ -19,6 +19,11 @@ export const items = [
         url: "/admin/dashboard/blog",
         icon: TalentupIcon,
     },
+    {
+        title: "Events",
+        url: "/admin/dashboard/events",
+        icon: StartupIcon,
+    },
 ]
 
 export default function AdminNavigation() {

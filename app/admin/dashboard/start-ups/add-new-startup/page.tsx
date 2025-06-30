@@ -3,7 +3,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploader } from "@/components/ui/file-uploader";
-import { Uploader } from "@/components/ui/uploader";
 import { useState } from 'react'
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
@@ -412,10 +411,10 @@ export default function CreateStartUpPage() {
 
     const handleAddFounder = async () => {
 
-        // if (!founder.photo) {
-        //     toast.error('Please upload a founder photo');
-        //     return;
-        // }
+        if (!founder.photo) {
+            toast.error('Please upload a founder photo');
+            return;
+        }
 
         const isValid = await validateFounderForm(founder);
         if (isValid) {
@@ -548,28 +547,35 @@ export default function CreateStartUpPage() {
                                         ) : item.type === 'image' ? (
                                             <>
                                                 <FileUploader
+                                                    key="startup-logo-uploader"
                                                     accept="image/*"
-                                                    maxSize={500 * 1024}
+                                                    maxSize={2 * 1024 * 1024}
                                                     onDrop={async (files) => {
                                                         const file = files[0];
                                                         if (file) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                toast.error('File size exceeds 2MB limit');
+                                                                return;
+                                                            }
                                                             try {
-                                                                setIsUploadingStartupImage(true)
+                                                                setIsUploadingStartupImage(true);
                                                                 const startupUrl = await uploadToCloudinary(file);
-                                                                if (startupUrl) setFormData((prev) => ({ ...prev, logo: startupUrl }))
-                                                                toast.success('Photo uploaded successfully')
+                                                                if (startupUrl) {
+                                                                    setFormData((prev) => ({ ...prev, logo: startupUrl }));
+                                                                    validateField('logo', startupUrl);
+                                                                }
+                                                                toast.success('Photo uploaded successfully');
                                                             } catch (error: unknown) {
                                                                 if (axios.isAxiosError(error)) {
-                                                                    const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                                    const resError = error.response?.data?.message || "An error occurred. Retry";
                                                                     console.error(resError);
-                                                                    toast.error(resError)
+                                                                    toast.error(resError);
                                                                 } else {
                                                                     console.error("An unexpected error occurred");
                                                                 }
                                                             } finally {
-                                                                setIsUploadingStartupImage(false)
+                                                                setIsUploadingStartupImage(false);
                                                             }
-
                                                         }
                                                     }}
                                                 />
@@ -655,7 +661,15 @@ export default function CreateStartUpPage() {
                                 )}
 
                                 <div className="flex flex-col sm:flex-row items-center md:col-span-2 gap-3 md:gap-[16px] w-full justify-end">
-
+                                    <button
+                                        type="button"
+                                        className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
+                                        onClick={() => setOpenDialog(true)}
+                                    >
+                                        <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
+                                            Add founders ({formdata.founders.length})
+                                        </p>
+                                    </button>
                                     <button
                                         type="submit"
                                         disabled={formdata.founders.length < 1 || isSubmitting}
@@ -679,15 +693,6 @@ export default function CreateStartUpPage() {
                 </section>
             </main>
 
-            <button
-                type="button"
-                className="flex py-2 md:py-[10px] px-4 md:px-[24px] items-center justify-center gap-2 bg-transparent border border-[#004acc] rounded-[50px] w-full sm:w-auto group hover:bg-[#004acc]"
-                onClick={() => setOpenDialog(true)}
-            >
-                <p className="font-figtree font-semibold text-sm sm:text-base md:text-[18px] text-[#005DFF] group-hover:text-[#fff] leading-[24px]">
-                    Add founders ({formdata.founders.length})
-                </p>
-            </button>
 
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogContent className="max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl">
@@ -720,34 +725,39 @@ export default function CreateStartUpPage() {
 
                                     {item.type === 'photo' ? (
                                         <>
-                                            <Uploader
+                                            <FileUploader
+                                                key={`founder-photo-uploader-${openDialog ? 'open' : 'closed'}`}
                                                 accept="image/*"
                                                 maxSize={2 * 1024 * 1024}
                                                 onDrop={async (files) => {
-                                                    console.log('Files received:', files)
                                                     const file = files[0];
                                                     if (file) {
-                                                        console.log('Starting upload...');
-                                                        setIsUploadingFounderImage(true)
+                                                        if (file.size > 2 * 1024 * 1024) {
+                                                            toast.error('File size exceeds 2MB limit');
+                                                            return;
+                                                        }
+                                                        setIsUploadingFounderImage(true);
                                                         try {
                                                             const founderUrl = await uploadToCloudinary(file);
-                                                            if (founderUrl) setFounder((prev) => ({
-                                                                ...prev,
-                                                                photo: founderUrl
-                                                            }))
-                                                            toast.success('Photo uploaded successfully')
+                                                            if (founderUrl) {
+                                                                setFounder((prev) => ({
+                                                                    ...prev,
+                                                                    photo: founderUrl
+                                                                }));
+                                                                validateFounderField('photo', founderUrl);
+                                                            }
+                                                            toast.success('Photo uploaded successfully');
                                                         } catch (error: unknown) {
                                                             if (axios.isAxiosError(error)) {
-                                                                const resError = error.response?.data?.message || "An error occurred. Retry"
+                                                                const resError = error.response?.data?.message || "An error occurred. Retry";
                                                                 console.error(resError);
-                                                                toast.error(resError)
+                                                                toast.error(resError);
                                                             } else {
                                                                 console.error("An unexpected error occurred");
                                                             }
                                                         } finally {
-                                                            setIsUploadingFounderImage(false)
+                                                            setIsUploadingFounderImage(false);
                                                         }
-
                                                     }
                                                 }}
                                             />
