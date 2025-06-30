@@ -23,7 +23,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button as CustomButton } from "@/components/ui/button";
 import { eventService } from "@/services/event";
 
 const eventCategories = [
@@ -134,6 +133,7 @@ export default function CreateEvent() {
                                     toast.error("Image upload failed");
                                 }
                             } catch (error) {
+                                console.error("Image upload error:", error);
                                 toast.error("Image upload failed");
                             }
                             setIsUploading(false);

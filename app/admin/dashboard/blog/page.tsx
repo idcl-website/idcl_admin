@@ -1,11 +1,4 @@
 "use client"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Search, Eye, Trash2, SquarePen, Loader2, CircleX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +11,6 @@ import {
 } from "@/components/ui/dialog"
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import TalentPageSkeleton from "@/skeletons/talent";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -45,7 +37,7 @@ import {
 import { blogSchema } from "@/validation/blog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { format, previousDay } from "date-fns"
+import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -57,16 +49,6 @@ import {
 import { formateDate } from "@/HelperFunctions/convertDate";
 import { BlogSkeleton } from "@/skeletons/blog";
 
-
-
-const TalentFilters = [
-    {
-        title: 'batch',
-        options: ['all', 2025, 2026, 2027, 2028],
-        width: 127,
-        selectWidth: 62
-    },
-]
 
 export interface Blogs {
     _id: string,
@@ -147,12 +129,6 @@ export default function TalentPage() {
         setFilteredBlogs(results)
     }, [filters, date, blogs])
 
-    const handleFilterChange = (filterType: string, value: string) => {
-        setfilters(prev => ({
-            ...prev,
-            [filterType]: value
-        }));
-    }
 
 
     const editFormik = useFormik({
