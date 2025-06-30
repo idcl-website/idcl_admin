@@ -80,7 +80,6 @@ export default function CreateEvent() {
             await eventSchema.validate(form, { abortEarly: false });
             setErrors({});
             const data = await eventService.createEvent(form);
-            router.push("/admin/dashboard/events"); // Redirect to events page after successful creation
             console.log("Event created successfully:", data);
             toast.success("Event created!");
             // Submit logic here
@@ -94,6 +93,7 @@ export default function CreateEvent() {
                 endDate: null,
                 time: "",
             });
+            router.push("/admin/dashboard/events");
         } catch (err) {
             if (err instanceof yup.ValidationError) {
                 const newErrors: { [key: string]: string } = {};
