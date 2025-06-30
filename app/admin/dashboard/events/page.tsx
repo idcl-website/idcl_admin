@@ -7,8 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { eventService } from '@/services/event';
 import { EventItem } from '@/types/event';
 import EventDisplay from '@/components/dashboard/event';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+
 
 const eventCategories = [
+    "All",
     "Conference",
     "Workshop",
     "Webinar",
@@ -24,37 +30,52 @@ const eventCategories = [
 export default function EventsPage() {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
-    const [currentPage, setCurrentPage] = useState(1); // Assuming pagination is needed
-    const [totalPages, setTotalPages] = useState(0); // State to hold total pages if needed
-    const [totalEvents, setTotalEvents] = useState(0); // State to hold total events if needed
-    // State to hold selected category  
-    const [category, setCategory] = useState('');
-    const [events, setEvents] = useState<EventItem[]>([]); // State to hold fetched events
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalEvents, setTotalEvents] = useState(0);
+    const [category, setCategory] = useState('All');
+    const [events, setEvents] = useState<EventItem[]>([]);
+    const [startDate, setStartDate] = useState<Date | null>(null);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
-    const handleCategoryChange = (value: string) => {
-        setCategory(value);
+    // Filtering logic
+    const filteredEvents = events.filter(event => {
+        const matchesSearch =
+            event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            event.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            event.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesCategory = category === "All" ? true : event.category === category;
+
+        const matchesStartDate = startDate
+            ? new Date(event.startDate).toDateString() === startDate.toDateString()
+            : true;
+
+        return matchesSearch && matchesCategory && matchesStartDate;
+    });
+
+    // Pagination handler
+    const handlePageChange = (page: number) => {
+        if (page >= 1 && page <= totalPages && page !== currentPage) {
+            setCurrentPage(page);
+        }
     };
 
     useEffect(() => {
         const getEvents = async () => {
             try {
-                // Fetch events from the server or API
-                // const response = await eventService.getAllEvents();
-                // console.log("Fetched events:", response);
-                const response = await eventService.getAllEvents(currentPage)
+                const response = await eventService.getAllEvents(currentPage);
                 setEvents(response.data || []);
-                setCurrentPage(response.page)
-                setTotalPages(response.totalPages)
-                setTotalEvents(response.total)
-                console.log("Fetched events:", response);
+                setCurrentPage(response.page);
+                setTotalPages(response.totalPages);
+                setTotalEvents(response.total);
             } catch (error) {
                 console.error("Error fetching events:", error);
             }
-        }
+        };
         getEvents();
     }, [currentPage]);
 
@@ -81,7 +102,7 @@ export default function EventsPage() {
                                 <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap mr-2">
                                     Category
                                 </p>
-                                <Select value={category} onValueChange={handleCategoryChange}>
+                                <Select value={category} onValueChange={setCategory}>
                                     <SelectTrigger
                                         className="h-[32px] min-w-[160px] rounded-sm md:rounded-[4px] bg-white flex items-center justify-between focus:ring-0 focus:ring-offset-0 data-[state=open]:bg-[#E1ECFF] text-xs md:text-[10px]"
                                     >
@@ -105,6 +126,44 @@ export default function EventsPage() {
                                 </Select>
                             </div>
                         </div>
+
+                        {/* Start Date Filter */}
+                        <div className="w-full max-w-xs">
+                            <div className="h-[35px] w-full rounded-lg md:rounded-[8px] py-1.5 md:py-[5px] px-2 md:px-[12px] bg-[#F0F2F5] flex items-center gap-3 md:gap-4">
+                                <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap mr-2">
+                                    Start Date
+                                </p>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="h-[32px] min-w-[160px] rounded-sm md:rounded-[4px] bg-white flex items-center justify-between px-3 text-xs md:text-[10px] border border-gray-300"
+                                        >
+                                            {startDate ? format(startDate, "dd MMM yyyy") : "Pick date"}
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={startDate || undefined}
+                                            onSelect={date => setStartDate(date ?? null)}
+                                            initialFocus
+                                            required={false}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                                {startDate && (
+                                    <button
+                                        type="button"
+                                        className="ml-2 text-xs text-gray-400 hover:text-gray-600"
+                                        onClick={() => setStartDate(null)}
+                                        title="Clear date"
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -116,13 +175,23 @@ export default function EventsPage() {
                     <span className="font-roboto text-white text-sm md:text-[15px] font-medium leading-normal">Add New</span>
                 </button>
             </div>
+
+            {/* Events Count Header */}
+            <div className="flex items-center justify-between px-2 md:px-0">
+                <h2 className="text-lg md:text-xl font-semibold text-[#101828]">
+                    Events <span className="text-[#005DFF]">({filteredEvents.length})</span>
+                </h2>
+                {/* Optionally, you can show totalEvents if you want the total from all pages */}
+                <span className="text-xs text-gray-500">Total: {totalEvents}</span>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-[39px]">
-                {events.length === 0 ? (
+                {filteredEvents.length === 0 ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-16">
                         <p className="text-gray-500 text-lg font-semibold">No events found.</p>
                     </div>
                 ) : (
-                    events.map((event, index) => (
+                    filteredEvents.map((event, index) => (
                         <div key={index} className="w-full max-w-[362px] mx-auto">
                             <EventDisplay
                                 image={event.image}
@@ -138,6 +207,38 @@ export default function EventsPage() {
                     ))
                 )}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex justify-center mt-8">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <PaginationItem key={i}>
+                                    <PaginationLink
+                                        isActive={currentPage === i + 1}
+                                        onClick={() => handlePageChange(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
         </div>
     );
 }
