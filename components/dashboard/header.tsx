@@ -26,13 +26,17 @@ export default function DashboardHeader({ isMobileOpen, toggleMobileMenu }: Dash
     const [currentPath, setCurrentPath] = useState<string>('')
 
     useEffect(() => {
-        const segments = pathname.split('/').filter(Boolean)
+        const segments = pathname.split('/').filter(Boolean);
 
+        // Helper: check if a segment is a MongoDB ObjectId (24 hex chars)
+        const isMongoId = (str: string) => /^[a-f\d]{24}$/i.test(str);
 
-        let displaySegment = segments[segments.length - 1]
-
-        if (!isNaN(Number(displaySegment))) {
-            displaySegment = segments[segments.length - 2] || displaySegment
+        // Remove trailing MongoDB id if present
+        let displaySegment = segments[segments.length - 1];
+        if (isNaN(Number(displaySegment)) && isMongoId(displaySegment)) {
+            displaySegment = segments[segments.length - 2] || displaySegment;
+        } else if (!isNaN(Number(displaySegment))) {
+            displaySegment = segments[segments.length - 2] || displaySegment;
         }
 
         setCurrentPath(
