@@ -15,7 +15,8 @@ import { useEffect, useState } from "react";
 import { startUpService } from "@/services/startup";
 import { Toaster } from "sonner";
 import axios from 'axios';
-
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 export interface StartUpInterface {
     id: string,
     track: string,
@@ -52,6 +53,8 @@ const startUpFilters = [
 ]
 
 export default function Dashboardpage() {
+    const { loading } = useAuth();
+    if(loading) return <Loader2 className="animate-spin" />
     const router = useRouter()
     const [isFetching, setIsFetching] = useState(true);
     const [startups, setStartups] = useState<StartUpInterface[]>([]);

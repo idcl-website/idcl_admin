@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <RequireAuth>
       <Toaster richColors position="top-center" />
-      <div className="flex min-h-screen">
+      <div className="flex h-screen p-4 gap-4">
         <AsideView
           isMobileOpen={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -21,12 +21,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main content area */}
         <div className={cn(
           "flex-1 flex flex-col",
-          "lg:ml-[208px] md:p-4"
+          // "lg:ml-[208px] md:p-4"
         )}>
           {/* Header container with sticky behavior only on mobile */}
           <div className={cn(
-            "md:mt-2 md:ml-4",
-            "sticky top-0 z-40 backdrop-blur-sm bg-white/80 sm:bg-transparent sm:backdrop-blur-2", // Mobile styles
+            "md:mt-2",
+            "sticky pb-4 top-0 z-20 backdrop-blur-sm bg-white/80 sm:bg-transparent sm:backdrop-blur-2", // Mobile styles
             "lg:static" // Remove sticky on desktop
           )}>
             <DashboardHeader
@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           </div>
 
-          <main className="flex-1 overflow-auto p-4 md:p-4">
+          <main className="flex-1 overflow-y-auto py-4 md:py-4 pr-2">
             {children}
           </main>
         </div>

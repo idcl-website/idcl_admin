@@ -50,6 +50,7 @@ const eventSchema = yup.object().shape({
         "End date can't be before start date"
     ),
     time: yup.string().required("Event time is required"),
+    url: yup.string().optional()
 });
 
 export default function CreateEvent() {
@@ -63,6 +64,7 @@ export default function CreateEvent() {
         startDate: null as Date | null,
         endDate: null as Date | null,
         time: "",
+        url: ""
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,6 +94,7 @@ export default function CreateEvent() {
                 startDate: null,
                 endDate: null,
                 time: "",
+                url: ""
             });
             router.push("/admin/dashboard/events");
         } catch (err) {
@@ -215,6 +218,19 @@ export default function CreateEvent() {
                     {errors.description && (
                         <p className="text-red-500 text-sm">{errors.description}</p>
                     )}
+                </div>
+                <div>
+                    <label className="block mb-1 font-medium">Url(optional)</label>
+                    <Input
+                        type="text"
+                        value={form.url}
+                        onChange={(e) => handleChange("url", e.target.value)}
+                        placeholder="Enter event url"
+                        // className={errors.url ? "border-red-500" : ""}
+                    />
+                    {/* {errors.url && (
+                        <p className="text-red-500 text-sm">{errors.url}</p>
+                    )} */}
                 </div>
                 <div>
                     <label className="block mb-1 font-medium">Category</label>

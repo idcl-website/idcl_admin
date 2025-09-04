@@ -81,6 +81,11 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+*{
+  box-sizing: border-box;
+  /* outline: 1px solid red; */
+}
+
 body {
   font-family: var(--font-satoshi), sans-serif;
 }

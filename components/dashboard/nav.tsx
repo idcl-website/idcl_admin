@@ -29,7 +29,7 @@ export const items = [
 export default function AdminNavigation() {
     const pathname = usePathname()
     return (
-        <nav className="w-full md:w-[177px] flex flex-col items-start gap-[14px]">
+        <nav className="w-max flex flex-col items-start gap-[14px]">
             {items.map((item, index) => {
                 const isActiveLink = pathname.startsWith(item.url);
                 const Icon = item.icon;

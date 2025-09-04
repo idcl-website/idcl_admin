@@ -1,4 +1,7 @@
+import { Trash, Trash2 } from "lucide-react";
 import Image from "next/image"
+import { eventService } from "@/services/event";
+import { toast } from "sonner";
 
 type EventItem = {
     image: string;
@@ -9,11 +12,28 @@ type EventItem = {
     day: string;
     month: string;
     time: string;
+    id: string;
+    handleDelete : any
 };
 
-export default function EventDisplay({ image, name, description, tagline, day, month, time }: EventItem) {
+export default function EventDisplay({ image, name, description, tagline, day, month, time, id, handleDelete}: EventItem) {
     return (
-        <div className="w-full max-w-[362px] h-[430px] mx-auto flex flex-col items-center bg-white rounded-[18px] shadow border border-[#E1ECFF] overflow-hidden">
+        <div className="w-full relative max-w-[362px] h-[430px] mx-auto flex flex-col items-center bg-white rounded-[18px] shadow border border-[#E1ECFF] overflow-hidden group">
+            <div className="absolute z-10 top-4 right-4 w-fit cursor-pointer group-hover:opacity-100 opacity-0 transition-all ease duration-200" onClick={ async () => {
+                try {
+                    await eventService.deleteEvent(id)
+                    handleDelete(id);
+                    toast.success('event deleted successfully')
+                } catch (error) {
+                    console.log(error)
+                    toast.error('failed to delete event')
+                } 
+            }}>
+                <Trash2 size={30} color="red"/>
+                {/* <p className="font-satoshi font-bold text-xs sm:text-sm text-[#7C7C7C] whitespace-nowrap">
+                    {time}
+                </p> */}
+            </div>
             {/* Image Container */}
             <div className="w-full aspect-[362/197] min-h-[197px] relative">
                 <Image

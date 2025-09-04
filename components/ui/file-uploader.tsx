@@ -45,10 +45,11 @@ export function FileUploader({
         >
             <input {...getInputProps()} id="file-upload-input" />
             <UploadIcon className="h-6 w-6 text-muted-foreground" />
-            <p className="mt-2 text-sm text-muted-foreground text-center">
                 {isDragActive ? (
-                    "Drop the files here"
-                ) : (
+                    <p className="mt-2 text-sm text-muted-foreground text-center">
+                        "Drop the files here"
+                    </p>
+                ) : (   
                     <>
                         <p className="font-mulish font-bold text-[16px] leading-[24px] text-[#0F0F0F]">
                             Drag & drop {multiple ? "files" : "a file"} here, or{" "}
@@ -68,7 +69,6 @@ export function FileUploader({
                         </span>
                     </>
                 )}
-            </p>
         </div>
     );
 }

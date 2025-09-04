@@ -35,27 +35,34 @@ export default function EventsPage() {
     const [totalEvents, setTotalEvents] = useState(0);
     const [category, setCategory] = useState('All');
     const [events, setEvents] = useState<EventItem[]>([]);
+    const [filteredEvents, setFilteredEvents] = useState<EventItem[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
+    const handleDelete = (id: string) => {
+        setFilteredEvents((prev: any)=> prev.filter((event: any)=> event._id !== id))
+    }
+
     // Filtering logic
-    const filteredEvents = events.filter(event => {
-        const matchesSearch =
-            event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    useEffect(()=>{
+        setFilteredEvents(events.filter(event => {
+            const matchesSearch =
+                event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesCategory = category === "All" ? true : event.category === category;
+            const matchesCategory = category === "All" ? true : event.category === category;
 
-        const matchesStartDate = startDate
-            ? new Date(event.startDate).toDateString() === startDate.toDateString()
-            : true;
+            const matchesStartDate = startDate
+                ? new Date(event.startDate).toDateString() === startDate.toDateString()
+                : true;
 
-        return matchesSearch && matchesCategory && matchesStartDate;
-    });
+            return matchesSearch && matchesCategory && matchesStartDate;
+        }));
+    }, [events, searchQuery, category, startDate])
 
     // Pagination handler
     const handlePageChange = (page: number) => {
@@ -191,20 +198,25 @@ export default function EventsPage() {
                         <p className="text-gray-500 text-lg font-semibold">No events found.</p>
                     </div>
                 ) : (
-                    filteredEvents.map((event, index) => (
-                        <div key={index} className="w-full max-w-[362px] mx-auto">
-                            <EventDisplay
-                                image={event.image}
-                                name={event.name}
-                                description={event.description}
-                                tagline={event.tagline}
-                                category={event.category}
-                                day={new Date(event.startDate).getDate().toString()}
-                                month={new Date(event.startDate).toLocaleString('default', { month: 'long' })}
-                                time={new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            />
-                        </div>
-                    ))
+                    filteredEvents.map((event, index) => {
+                        console.log(event)
+                        return (
+                            <div key={index} className="w-full max-w-[362px] mx-auto">
+                                <EventDisplay
+                                    id={event._id}
+                                    image={event.image}
+                                    name={event.name}
+                                    description={event.description}
+                                    tagline={event.tagline}
+                                    category={event.category}
+                                    day={new Date(event.startDate).getDate().toString()}
+                                    month={new Date(event.startDate).toLocaleString('default', { month: 'long' })}
+                                    time={new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    handleDelete={handleDelete}
+                                />
+                            </div>
+                        )
+                    })
                 )}
             </div>
 

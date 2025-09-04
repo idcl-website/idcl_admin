@@ -7,4 +7,5 @@ export type EventItem = {
     endDate: string;
     startDate: string;
     time: string;
+    _id: string;
 };

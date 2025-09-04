@@ -35,9 +35,9 @@ export default function AsideView({ isMobileOpen, onClose }: AsideViewProps) {
             )}
 
             <aside className={cn(
-                "bg-[#fff] w-[208px] fixed h-screen py-[26px] px-[15px] flex flex-col items-center gap-[179px]",
+                "bg-[#fff] h-full py-[26px] px-[15px] flex flex-col items-center gap-[179px]",
                 "transition-transform duration-300 ease-in-out",
-                "lg:translate-x-0 lg:z-20 lg:left-4 lg:top-4 lg:h-[calc(100vh-32px)] lg:rounded-[10px]", // Desktop positioning
+                "lg:rounded-[10px]", // Desktop positioning
                 isMobile ? "z-40" : "z-20",
                 isMobile ? (isMobileOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"
             )}>

@@ -48,7 +48,7 @@ export default function DashboardHeader({ isMobileOpen, toggleMobileMenu }: Dash
     }, [pathname])
 
     return (
-        <header className="bg-[#fff] w-full md:w-[1080px] h-[50px] sm:rounded-[10px] sm:border-none py-3 px-6 flex justify-between items-center border-b border-gray-200">
+        <header className="bg-[#fff] h-[50px] sm:rounded-[10px] sm:border-none py-3 px-6 flex justify-between items-center border-b border-gray-200">
             <div className="flex items-center gap-4">
                 {/* Mobile menu button - only visible on small screens */}
                 <Button

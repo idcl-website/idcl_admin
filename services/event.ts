@@ -16,6 +16,9 @@ export const eventService = {
             }
         })
         return response.data;
+    },
+    deleteEvent: async (id: string) => {
+        const response = await axiosInstance.delete(`/admin/event/delete/${id}`)
+        return response.data;
     }
-
 }
