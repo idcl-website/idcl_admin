@@ -1,18 +1,15 @@
 "use client"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from 'react'
-import user from '@/assets/icons/user.png'
-import dropdown from '@/assets/icons/dropdown.svg'
-import Image from "next/image"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut } from "lucide-react"
+import { ChevronDown, LogOut, Menu, X } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface DashboardHeaderProps {
@@ -23,68 +20,76 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ isMobileOpen, toggleMobileMenu }: DashboardHeaderProps) {
     const { logout } = useAuth()
     const pathname = usePathname()
-    const [currentPath, setCurrentPath] = useState<string>('')
+    const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([])
 
     useEffect(() => {
-        const segments = pathname.split('/').filter(Boolean);
+        const segments = pathname.split('/').filter(Boolean)
+        const isMongoId = (s: string) => /^[a-f\d]{24}$/i.test(s)
 
-        // Helper: check if a segment is a MongoDB ObjectId (24 hex chars)
-        const isMongoId = (str: string) => /^[a-f\d]{24}$/i.test(str);
+        const crumbs = segments
+            .filter(s => !isMongoId(s) && isNaN(Number(s)))
+            .map((s) => ({
+                label: s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                url: '/' + segments.slice(0, segments.indexOf(s) + 1).join('/')
+            }))
+            .slice(2) // skip "admin/dashboard"
 
-        // Remove trailing MongoDB id if present
-        let displaySegment = segments[segments.length - 1];
-        if (isNaN(Number(displaySegment)) && isMongoId(displaySegment)) {
-            displaySegment = segments[segments.length - 2] || displaySegment;
-        } else if (!isNaN(Number(displaySegment))) {
-            displaySegment = segments[segments.length - 2] || displaySegment;
-        }
-
-        setCurrentPath(
-            displaySegment
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ')
-        )
+        setBreadcrumbs(crumbs)
     }, [pathname])
 
     return (
-        <header className="bg-[#fff] h-[50px] sm:rounded-[10px] sm:border-none py-3 px-6 flex justify-between items-center border-b border-gray-200">
-            <div className="flex items-center gap-4">
-                {/* Mobile menu button - only visible on small screens */}
+        <header className="h-[60px] shrink-0 bg-white border-b border-gray-100 px-6 flex items-center justify-between">
+            {/* Left: mobile toggle + breadcrumb */}
+            <div className="flex items-center gap-3">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={toggleMobileMenu}
-                    className="lg:hidden"
+                    className="lg:hidden h-8 w-8"
                 >
-                    {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    {isMobileOpen ? <X size={18} /> : <Menu size={18} />}
                 </Button>
-                <p className="text-[#1E1E1E] text-[14px] sm:text-[16px] font-bold leading-normal">
-                    {currentPath}
-                </p>
-            </div>
-            <div className="flex items-center gap-[8px]">
-                <Image src={user} alt="user" priority width={23} height={23} />
-                <p className="text-[#000] text-[14px] font-bold leading-normal">Jon Doe</p>
-                <DropdownMenu>
-                    <DropdownMenuTrigger>
-                        <Image src={dropdown} alt="user" priority width={23} height={23} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
 
-                        <DropdownMenuItem>
-                            <LogOut className="h-4 w-4 mr-2" />
-                            <button
-                                onClick={() => {
-                                    logout();
-                                }}
-                            >
-                                Logout
-                            </button>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <nav className="flex items-center gap-1.5 text-sm">
+                    <span className="text-gray-400 font-medium">Dashboard</span>
+                    {breadcrumbs.map((crumb, i) => (
+                        <span key={i} className="flex items-center gap-1.5">
+                            <span className="text-gray-300">/</span>
+                            <span className={i === breadcrumbs.length - 1 ? "text-gray-900 font-semibold" : "text-gray-400"}>
+                                {crumb.label}
+                            </span>
+                        </span>
+                    ))}
+                </nav>
             </div>
+
+            {/* Right: user menu */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors outline-none">
+                        {/* Avatar initials */}
+                        <div className="w-7 h-7 rounded-full bg-[#005DFF] flex items-center justify-center shrink-0">
+                            <span className="text-white text-[11px] font-semibold">JD</span>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 hidden sm:block">Jon Doe</span>
+                        <ChevronDown size={14} className="text-gray-400" />
+                    </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                    <div className="px-3 py-2">
+                        <p className="text-sm font-medium text-gray-900">Jon Doe</p>
+                        <p className="text-xs text-gray-400">Administrator</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={logout}
+                        className="text-red-500 focus:text-red-500 focus:bg-red-50 cursor-pointer gap-2"
+                    >
+                        <LogOut size={14} />
+                        Logout
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </header>
     )
 }

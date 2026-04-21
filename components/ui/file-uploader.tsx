@@ -3,13 +3,34 @@
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { UploadIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface FileUploaderProps {
-    accept: string;
-    maxSize: number;
+    accept?: string;
+    maxSize?: number;
     multiple?: boolean;
     maxFiles?: number;
     onDrop: (files: File[]) => void;
+}
+
+// Maps MIME types to their common extensions for react-dropzone
+const MIME_EXTENSIONS: Record<string, string[]> = {
+    "image/jpeg": [".jpg"],
+    "image/jpg":  [".jpg"],
+    "image/png":  [".png"],
+    "image/svg+xml": [".svg"],
+    "image/gif":  [".gif"],
+    "image/webp": [".webp"],
+    "image/*":    [],
+}
+
+function buildAccept(accept?: string): Record<string, string[]> {
+    if (!accept) return { "image/*": [] };
+    return accept.split(",").reduce((acc, mime) => {
+        const key = mime.trim();
+        acc[key] = MIME_EXTENSIONS[key] ?? [];
+        return acc;
+    }, {} as Record<string, string[]>);
 }
 
 export function FileUploader({
@@ -20,15 +41,26 @@ export function FileUploader({
     onDrop,
 }: FileUploaderProps) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: accept.split(",").reduce((acc, type) => {
-            acc[type] = [];
-            return acc;
-        }, {} as Record<string, string[]>),
+        accept: buildAccept(accept),
         maxSize,
         multiple,
         maxFiles,
         onDrop: (acceptedFiles) => {
             onDrop(acceptedFiles);
+        },
+        onDropRejected: (rejectedFiles) => {
+            rejectedFiles.forEach(({ file, errors }) => {
+                errors.forEach((err) => {
+                    if (err.code === 'file-too-large') {
+                        const limitMB = maxSize ? Math.round(maxSize / 1024 / 1024) : '?';
+                        toast.error(`"${file.name}" exceeds the ${limitMB} MB size limit.`);
+                    } else if (err.code === 'file-invalid-type') {
+                        toast.error(`"${file.name}" is not a supported format. Use JPG, PNG or SVG.`);
+                    } else {
+                        toast.error(`"${file.name}" was rejected: ${err.message}`);
+                    }
+                });
+            });
         },
     });
 
@@ -47,7 +79,7 @@ export function FileUploader({
             <UploadIcon className="h-6 w-6 text-muted-foreground" />
                 {isDragActive ? (
                     <p className="mt-2 text-sm text-muted-foreground text-center">
-                        "Drop the files here"
+                        &ldquo;Drop the files here&rdquo;
                     </p>
                 ) : (   
                     <>

@@ -1,4 +1,4 @@
-import { Trash, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import Image from "next/image"
 import { eventService } from "@/services/event";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ type EventItem = {
     month: string;
     time: string;
     id: string;
-    handleDelete : any
+    handleDelete : (id: string) => void;
 };
 
 export default function EventDisplay({ image, name, description, tagline, day, month, time, id, handleDelete}: EventItem) {

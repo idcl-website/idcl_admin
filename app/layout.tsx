@@ -1,8 +1,9 @@
-"use client"
+import type { Metadata } from "next";
+import "./globals.css";
 import { Geist, Geist_Mono, Inter, Figtree, Roboto } from "next/font/google";
 import localFont from "next/font/local";
-import "./globals.css";
 import { AuthProvider } from '../contexts/AuthContext';
+import NextTopLoader from "nextjs-toploader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "IDCL Admin",
+  description: "Imo Digital City Limited — Admin Dashboard",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -69,6 +75,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${satoshi.variable} ${roboto.variable} ${figtree.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
+        <NextTopLoader />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

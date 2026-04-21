@@ -43,7 +43,7 @@ export default function EventsPage() {
     };
 
     const handleDelete = (id: string) => {
-        setFilteredEvents((prev: any)=> prev.filter((event: any)=> event._id !== id))
+        setFilteredEvents((prev: EventItem[])=> prev.filter((event: EventItem)=> event._id !== id))
     }
 
     // Filtering logic

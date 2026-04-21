@@ -103,6 +103,25 @@ body {
   /* Firefox */
 }
 
+/* Thin blended scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c7d7ff 0%, #005DFF55 100%);
+  border-radius: 99px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #93b4ff 0%, #005DFFaa 100%);
+}
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #005DFF44 transparent;
+}
+
 .dark {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
@@ -139,9 +158,6 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
 
   body {
     @apply bg-background text-foreground;

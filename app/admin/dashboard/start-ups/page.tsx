@@ -53,9 +53,8 @@ const startUpFilters = [
 ]
 
 export default function Dashboardpage() {
-    const { loading } = useAuth();
-    if(loading) return <Loader2 className="animate-spin" />
     const router = useRouter()
+    const { loading } = useAuth();
     const [isFetching, setIsFetching] = useState(true);
     const [startups, setStartups] = useState<StartUpInterface[]>([]);
     const [filteredStartups, setFilteredStartups] = useState<StartUpInterface[]>([]);
@@ -124,6 +123,7 @@ export default function Dashboardpage() {
         getStarUps();
     }, [])
 
+    if(loading) return <Loader2 className="animate-spin" />
     if (isFetching) return <StarupSkelenton />
     if (!startups.length) return <p>No startup found</p>
 

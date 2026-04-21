@@ -39,7 +39,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
     Popover,
@@ -193,45 +192,47 @@ export default function TalentPage() {
     return (
         <div className="space-y-4 md:space-y-6 ">
             {/* Search and Filters Section */}
-            <aside className="w-full flex flex-col sm:flex-row gap-3 md:gap-[20px] items-stretch sm:items-center py-2 md:py-[6px] px-3 md:px-[12px] bg-white rounded-lg md:rounded-[10px]">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                 {/* Search Input */}
-                <div className="relative w-full md:max-w-[700px]">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     <Input
-                        placeholder="Search"
-                        className="pl-10 rounded-2xl md:rounded-[16px] w-full bg-white"
+                        placeholder="Search posts..."
+                        className="pl-9 h-10 bg-white border-gray-200 rounded-lg text-sm focus-visible:ring-1 focus-visible:ring-[#005DFF] w-full text-gray-500 focus:text-black"
                         value={filters.search}
-                        onChange={(e) => setfilters((prev) => ({
-                            ...prev,
-                            search: e.target.value
-                        }))}
+                        onChange={(e) => setfilters((prev) => ({ ...prev, search: e.target.value }))}
                     />
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-[10px]">
-                    <div className="w-full sm:w-auto min-w-[160px] h-auto rounded-lg md:rounded-[8px] py-1 md:py-[5px] px-3 md:px-[12px] bg-[#F0F2F5] flex items-center gap-2 md:gap-[11px]">
-                        <p className="font-inter font-normal text-xs md:text-[10px] leading-[14px] capitalize text-[#667085] whitespace-nowrap">
-                            Date
-                        </p>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    data-empty={!date}
-                                    className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal border-none"
+                {/* Date filter */}
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <button className={cn(
+                            "h-10 flex items-center gap-2 px-3.5 rounded-lg border text-sm transition-colors bg-white",
+                            date
+                                ? "border-[#005DFF] text-[#005DFF]"
+                                : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        )}>
+                            <CalendarIcon size={15} />
+                            <span className="whitespace-nowrap">
+                                {date ? format(date, "MMM d, yyyy") : "Filter by date"}
+                            </span>
+                            {date && (
+                                <span
+                                    role="button"
+                                    onClick={(e) => { e.stopPropagation(); setDate(undefined); }}
+                                    className="ml-1 rounded-full hover:bg-blue-100 p-0.5 transition-colors"
                                 >
-                                    {date ? <button onClick={() => setDate(undefined)}><CircleX /></button> : <CalendarIcon />}
-                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar mode="single" selected={date} onSelect={setDate} />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                </div>
-            </aside>
+                                    <CircleX size={13} />
+                                </span>
+                            )}
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 shadow-lg border-gray-100" align="end">
+                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                    </PopoverContent>
+                </Popover>
+            </div>
 
             {/* Talent Pool Section */}
             <section className="bg-white rounded-lg md:rounded-[10px] overflow-hidden">
@@ -285,7 +286,7 @@ export default function TalentPage() {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-4">
-                                        <p className="line-clamp-6 sm:line-clamp-7 text-justify text-gray-500">{news.body}</p>
+                                        <p className="line-clamp-6 sm:line-clamp-7 text-justify text-gray-500">{news.body.replace(/<[^>]*>/g, '')}</p>
                                         <div className="flex items-center justify-between">
                                             <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
                                             <div className="flex items-center gap-4">
@@ -305,17 +306,56 @@ export default function TalentPage() {
                                             <DialogTrigger asChild>
                                                 <button className="bg-green-500 p-2 w-10 h-10 border-none rounded-full cursor-pointer group hover:border hover:border-solid hover:border-green-500 hover:bg-transparent transition-all"><Eye className="text-white group-hover:text-green-500" /></button>
                                             </DialogTrigger>
-                                            <DialogContent className="max-h-[80vh] overflow-auto">
-                                                <DialogHeader>
-                                                    <DialogTitle className="flex flex-col items-start gap-4">
-                                                        <Image src={news.image} alt='news-image' width={100} height={40} priority />
-                                                        <p className="text-justify underline">{news.title}</p>
+                                            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 gap-0 rounded-xl scrollbar-thin">
+                                                {/* Cover image — full bleed flush to top */}
+                                                <div className="w-full h-80 relative overflow-hidden">
+                                                    <Image
+                                                        src={news.image}
+                                                        alt={news.title}
+                                                        fill
+                                                        priority
+                                                        className="object-cover object-top"
+                                                    />
+                                                </div>
+
+                                                <div className="px-7 py-6 space-y-5">
+                                                    {/* Meta */}
+                                                    <div className="flex items-center gap-3 text-xs text-gray-400 uppercase tracking-wide">
+                                                        <span className="border-l-2 border-red-400 pl-2 capitalize text-gray-500 font-medium">{news.location}</span>
+                                                        <span>·</span>
+                                                        <span>{news.createdAt}</span>
+                                                        {news.time && <><span>·</span><span>{news.time}</span></>}
+                                                    </div>
+
+                                                    {/* Title */}
+                                                    <DialogTitle asChild>
+                                                        <h2 className="text-2xl font-bold text-gray-900 leading-snug">{news.title}</h2>
                                                     </DialogTitle>
-                                                    <DialogDescription>
-                                                        <p className="text-justify">{news.snippet}</p>
+
+                                                    {/* Excerpt */}
+                                                    <p className="text-base font-medium text-gray-500 leading-relaxed border-l-4 border-[#005DFF] pl-4 italic">
+                                                        {news.snippet}
+                                                    </p>
+
+                                                    <hr className="border-gray-100" />
+
+                                                    {/* Body */}
+                                                    <DialogDescription asChild>
+                                                        <div
+                                                            className="text-gray-700 leading-relaxed text-[15px] space-y-3
+                                                                [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-6 [&_h1]:mb-2
+                                                                [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-gray-800 [&_h2]:mt-5 [&_h2]:mb-2
+                                                                [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-1
+                                                                [&_p]:my-2 [&_p]:leading-relaxed
+                                                                [&_blockquote]:border-l-4 [&_blockquote]:border-gray-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_blockquote]:my-4
+                                                                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1
+                                                                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1
+                                                                [&_a]:text-[#005DFF] [&_a]:underline [&_a]:underline-offset-2
+                                                                [&_strong]:font-semibold [&_em]:italic"
+                                                            dangerouslySetInnerHTML={{ __html: news.body }}
+                                                        />
                                                     </DialogDescription>
-                                                </DialogHeader>
-                                                <p className="text-justify">{news.body}</p>
+                                                </div>
                                             </DialogContent>
                                         </Dialog>
                                         <div className="flex items-center gap-4">
