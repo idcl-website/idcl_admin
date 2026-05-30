@@ -24,8 +24,6 @@ export default function CreateBlog() {
     const [isUploading, setIsUploading] = useState(false)
     const editorRef = useRef<HTMLDivElement>(null);
 
-    const MIN_WIDTH = 800;
-    const MIN_HEIGHT = 400;
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
     const sanitizeEditorHtml = (html: string) =>
@@ -45,22 +43,6 @@ export default function CreateBlog() {
     const handleImageUpload = async (file: File) => {
         if (file.size > MAX_FILE_SIZE) {
             toast.error(`Image too large. Maximum size is 5 MB (your file: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
-            return;
-        }
-
-        // Check dimensions before uploading
-        const dimensions = await new Promise<{ width: number; height: number }>((resolve) => {
-            const url = URL.createObjectURL(file);
-            const img = new window.Image();
-            img.onload = () => {
-                resolve({ width: img.naturalWidth, height: img.naturalHeight });
-                URL.revokeObjectURL(url);
-            };
-            img.src = url;
-        });
-
-        if (dimensions.width < MIN_WIDTH || dimensions.height < MIN_HEIGHT) {
-            toast.error(`Image too small. Minimum size is ${MIN_WIDTH}×${MIN_HEIGHT}px (uploaded: ${dimensions.width}×${dimensions.height}px).`);
             return;
         }
 

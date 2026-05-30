@@ -275,9 +275,11 @@ export default function TalentPage() {
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
-                                <Card key={index} className="w-full relative h-[750px] hover:shadow-2xl transition-shadow sm:min-h-[750px]">
+                                <Card key={index} className="w-full relative h-fit hover:shadow-2xl transition-shadow">
                                     <CardHeader>
-                                        <Image src={news.image} width={80} height={30} alt='news-photo' priority className="w-full rounded-md hover:scale-103 transition-transform duration-300 " />
+                                        <div className="w-full h-[50vmin] relative overflow-hidden rounded-md">
+                                            <Image src={news.image} width={80} height={30} alt='news-photo' priority className="w-full h-full object-cover hover:scale-103 transition-transform duration-300" />
+                                        </div>
                                         <CardTitle className="mb-4 line-clamp-1 sm:line-clamp-2">{news.title}</CardTitle>
                                         <CardDescription>
                                             <p className="line-clamp-4 sm:line-clamp-6 text-justify text-gray-400">
@@ -286,14 +288,13 @@ export default function TalentPage() {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-4">
-                                        <p className="line-clamp-6 sm:line-clamp-7 text-justify text-gray-500">{news.body.replace(/<[^>]*>/g, '')}</p>
                                         <div className="flex items-center justify-between">
                                             <p className="border-l border-l-2 border-red-500 px-2 capitalize">{news.location.toLowerCase()}</p>
                                             <div className="flex items-center gap-4">
                                                 <p className="text-gray-400">{news.createdAt}</p>
                                                 <p className="text-gray-400">{news.time}</p>
                                             </div>
-                                        </div>
+                                         </div>
 
                                     </CardContent>
                                     <CardFooter className="flex items-center justify-between absolute bottom-2 w-full ">
@@ -314,7 +315,7 @@ export default function TalentPage() {
                                                         alt={news.title}
                                                         fill
                                                         priority
-                                                        className="object-cover object-top"
+                                                        className="object-cover object-[0%_30%] hover:scale-105 transition-transform duration-300"
                                                     />
                                                 </div>
 
