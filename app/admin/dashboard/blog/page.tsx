@@ -275,7 +275,7 @@ export default function TalentPage() {
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {filteredBlogs.map((news, index) => (
-                                <Card key={index} className="w-full relative h-fit hover:shadow-2xl transition-shadow">
+                                <Card key={index} className="w-full relative h-[95vmin] hover:shadow-2xl transition-shadow">
                                     <CardHeader>
                                         <div className="w-full h-[50vmin] relative overflow-hidden rounded-md">
                                             <Image src={news.image} width={80} height={30} alt='news-photo' priority className="w-full h-full object-cover hover:scale-103 transition-transform duration-300" />
