@@ -28,6 +28,20 @@ export default function CreateBlog() {
     const MIN_HEIGHT = 400;
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
+    const sanitizeEditorHtml = (html: string) =>
+        html
+            .replace(/ class=("[^"]*"|'[^']*')/g, '')
+            .replace(/ style=("[^"]*"|'[^']*')/g, '');
+
+    const syncEditorToFormik = () => {
+        if (!editorRef.current) return;
+        const clean = sanitizeEditorHtml(editorRef.current.innerHTML);
+        if (editorRef.current.innerHTML !== clean) {
+            editorRef.current.innerHTML = clean;
+        }
+        formik.setFieldValue('body', clean);
+    };
+
     const handleImageUpload = async (file: File) => {
         if (file.size > MAX_FILE_SIZE) {
             toast.error(`Image too large. Maximum size is 5 MB (your file: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
@@ -277,12 +291,19 @@ export default function CreateBlog() {
                                     ref={editorRef}
                                     contentEditable
                                     suppressContentEditableWarning
-                                    onInput={(e) => {
-                                        // Strip browser-injected class/style attributes from execCommand
-                                        const clean = e.currentTarget.innerHTML
-                                            .replace(/ class="[^"]*"/g, '')
-                                            .replace(/ style="[^"]*"/g, '');
-                                        formik.setFieldValue('body', clean);
+                                    onInput={syncEditorToFormik}
+                                    onPaste={(e) => {
+                                        e.preventDefault();
+                                        const html = e.clipboardData.getData('text/html');
+                                        const text = e.clipboardData.getData('text/plain');
+
+                                        if (html) {
+                                            document.execCommand('insertHTML', false, sanitizeEditorHtml(html));
+                                        } else {
+                                            document.execCommand('insertText', false, text);
+                                        }
+
+                                        requestAnimationFrame(syncEditorToFormik);
                                     }}
                                     onBlur={() => formik.setFieldTouched('body', true)}
                                     className="min-h-[400px] text-base leading-relaxed p-4 outline-none [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-blue-600 [&_a]:underline"
