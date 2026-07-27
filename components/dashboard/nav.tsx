@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
-import { Rocket, Users, BookOpen, CalendarDays } from "lucide-react"
+import { Rocket, Users, BookOpen, CalendarDays, Images } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export const items = [
@@ -8,6 +8,7 @@ export const items = [
     { title: "Talent",     url: "/admin/dashboard/talent",    icon: Users },
     { title: "Blogs",      url: "/admin/dashboard/blog",      icon: BookOpen },
     { title: "Events",     url: "/admin/dashboard/events",    icon: CalendarDays },
+    { title: "Gallery",    url: "/admin/dashboard/gallery",   icon: Images },
 ]
 
 export default function AdminNavigation() {
