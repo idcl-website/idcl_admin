@@ -9,13 +9,20 @@ import Image from "next/image";
 import { blogSchema } from "@/validation/blog";
 import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
 import { useFormik } from 'formik';
-import { ArrowLeft, ImagePlus, LoaderCircle } from "lucide-react";
+import { ArrowLeft, CalendarIcon, CircleX, ImagePlus, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { blogService } from "@/services/blog";
 import { RichTextControllers } from "./richTextControllers";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { format } from "date-fns";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 
 
 export default function CreateBlog() {
@@ -26,10 +33,30 @@ export default function CreateBlog() {
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-    const sanitizeEditorHtml = (html: string) =>
-        html
-            .replace(/ class=("[^"]*"|'[^']*')/g, '')
-            .replace(/ style=("[^"]*"|'[^']*')/g, '');
+    // Keeps the pasted HTML's styles, classes and links intact while removing
+    // anything that could execute (scripts, iframes, event handlers, javascript: URLs).
+    const sanitizeEditorHtml = (html: string) => {
+        if (!html) return html;
+
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        doc.querySelectorAll('script, iframe, object, embed, meta, link, base, title, head').forEach((el) => el.remove());
+        doc.querySelectorAll('*').forEach((el) => {
+            [...el.attributes].forEach((attr) => {
+                if (attr.name.toLowerCase().startsWith('on')) el.removeAttribute(attr.name);
+            });
+        });
+        doc.querySelectorAll('a[href]').forEach((el) => {
+            const href = el.getAttribute('href') ?? '';
+            if (href.trim().toLowerCase().startsWith('javascript:')) el.setAttribute('href', '#');
+        });
+        doc.querySelectorAll('img[src]').forEach((el) => {
+            const src = el.getAttribute('src') ?? '';
+            if (src.trim().toLowerCase().startsWith('javascript:')) el.removeAttribute('src');
+        });
+
+        return doc.body.innerHTML;
+    };
 
     const syncEditorToFormik = () => {
         if (!editorRef.current) return;
@@ -61,12 +88,24 @@ export default function CreateBlog() {
         }
     };
 
+    const slugify = (value: string) =>
+        value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
     const formik = useFormik({
         initialValues: {
             title: '',
             snippet: '',
             body: '',
-            location: ''
+            location: '',
+            metaTitle: '',
+            metaDescription: '',
+            slug: '',
+            primaryKeywords: '',
+            secondaryKeywords: '',
+            publishedDate: '',
+            isPublished: false,
+            author: '',
+            tags: ''
         },
         validationSchema: blogSchema,
         onSubmit: async (values) => {
@@ -206,7 +245,12 @@ export default function CreateBlog() {
                                 )}
                                 value={formik.values.title}
                                 onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
+                                onBlur={(e) => {
+                                    formik.handleBlur(e);
+                                    if (!formik.values.slug && formik.values.title) {
+                                        formik.setFieldValue('slug', `/${slugify(formik.values.title)}`);
+                                    }
+                                }}
                             />
                             {formik.touched.title && formik.errors.title && (
                                 <p className="text-red-500 text-xs">{formik.errors.title}</p>
@@ -300,6 +344,217 @@ export default function CreateBlog() {
                         {formik.touched.body && formik.errors.body && (
                             <p className="text-red-500 text-xs">{formik.errors.body}</p>
                         )}
+                    </section>
+
+                    {/* SEO & Publishing */}
+                    <section className="space-y-5">
+                        <div>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">SEO & Publishing</p>
+                            <p className="text-xs text-gray-400 mt-1">Optional — recommended for search visibility.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="space-y-1.5 sm:col-span-2">
+                                <Label htmlFor="metaTitle" className="text-sm font-medium text-gray-700">
+                                    Meta Title
+                                    <span className="ml-1.5 text-gray-400 font-normal text-xs">(~60 characters)</span>
+                                </Label>
+                                <Input
+                                    id="metaTitle"
+                                    name="metaTitle"
+                                    type="text"
+                                    maxLength={60}
+                                    placeholder="Founder Dojo Imo: 9 Startups Built in Imo State | IDCL"
+                                    className={cn(
+                                        "text-base h-11",
+                                        (formik.touched.metaTitle && formik.errors.metaTitle) && "border-red-400 focus-visible:ring-red-400"
+                                    )}
+                                    value={formik.values.metaTitle}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <span>{formik.touched.metaTitle && formik.errors.metaTitle}</span>
+                                    <span>{formik.values.metaTitle.length}/60</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5 sm:col-span-2">
+                                <Label htmlFor="metaDescription" className="text-sm font-medium text-gray-700">
+                                    Meta Description
+                                    <span className="ml-1.5 text-gray-400 font-normal text-xs">(~155 characters)</span>
+                                </Label>
+                                <Textarea
+                                    id="metaDescription"
+                                    name="metaDescription"
+                                    rows={3}
+                                    maxLength={160}
+                                    placeholder="How Imo Digital City's Founder Dojo turned 600+ applications into 9 globally competitive startups, showcased at GITEX 2026, with Demo Day on 15 September."
+                                    className={cn(
+                                        "resize-none text-base leading-relaxed",
+                                        (formik.touched.metaDescription && formik.errors.metaDescription) && "border-red-400 focus-visible:ring-red-400"
+                                    )}
+                                    value={formik.values.metaDescription}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <span>{formik.touched.metaDescription && formik.errors.metaDescription}</span>
+                                    <span>{formik.values.metaDescription.length}/160</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5 sm:col-span-2">
+                                <Label htmlFor="slug" className="text-sm font-medium text-gray-700">URL Slug</Label>
+                                <Input
+                                    id="slug"
+                                    name="slug"
+                                    type="text"
+                                    placeholder="/founder-dojo-imo-9-startups-built-in-imo-state"
+                                    className={cn(
+                                        "text-base h-11",
+                                        (formik.touched.slug && formik.errors.slug) && "border-red-400 focus-visible:ring-red-400"
+                                    )}
+                                    value={formik.values.slug}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <p className="text-xs text-gray-400">
+                                    {formik.errors.slug
+                                        ? formik.errors.slug
+                                        : "Auto-generated from the title if left empty."}
+                                </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="primaryKeywords" className="text-sm font-medium text-gray-700">Primary Keywords</Label>
+                                <Input
+                                    id="primaryKeywords"
+                                    name="primaryKeywords"
+                                    type="text"
+                                    placeholder="Founder Dojo Imo, Imo Digital City, Imo State startups"
+                                    className="text-base h-11"
+                                    value={formik.values.primaryKeywords}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <p className="text-xs text-gray-400">Comma-separated.</p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="secondaryKeywords" className="text-sm font-medium text-gray-700">Secondary Keywords</Label>
+                                <Input
+                                    id="secondaryKeywords"
+                                    name="secondaryKeywords"
+                                    type="text"
+                                    placeholder="GITEX Nigeria 2026, USMAC, climate tech"
+                                    className="text-base h-11"
+                                    value={formik.values.secondaryKeywords}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <p className="text-xs text-gray-400">Comma-separated.</p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="author" className="text-sm font-medium text-gray-700">Written By</Label>
+                                <Input
+                                    id="author"
+                                    name="author"
+                                    type="text"
+                                    placeholder="Primus Amaefule"
+                                    className="text-base h-11"
+                                    value={formik.values.author}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="tags" className="text-sm font-medium text-gray-700">Suggested Tags</Label>
+                                <Input
+                                    id="tags"
+                                    name="tags"
+                                    type="text"
+                                    placeholder="#FounderDojoImo, #ImoDigitalCity, #StartupNigeria"
+                                    className="text-base h-11"
+                                    value={formik.values.tags}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <p className="text-xs text-gray-400">Comma-separated hashtags.</p>
+                            </div>
+
+                            <div className="space-y-1.5 sm:col-span-2">
+                                <Label className="text-sm font-medium text-gray-700">Published</Label>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <div className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 p-0.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => formik.setFieldValue('isPublished', false)}
+                                            className={cn(
+                                                "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                                !formik.values.isPublished
+                                                    ? "bg-white text-gray-900 shadow-sm"
+                                                    : "text-gray-500 hover:text-gray-700"
+                                            )}
+                                        >
+                                            Draft
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => formik.setFieldValue('isPublished', true)}
+                                            className={cn(
+                                                "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                                formik.values.isPublished
+                                                    ? "bg-[#005DFF] text-white shadow-sm"
+                                                    : "text-gray-500 hover:text-gray-700"
+                                            )}
+                                        >
+                                            Published
+                                        </button>
+                                    </div>
+
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <button
+                                                type="button"
+                                                className={cn(
+                                                    "h-9 flex items-center gap-2 px-3 rounded-lg border text-sm bg-white transition-colors",
+                                                    formik.values.publishedDate
+                                                        ? "border-[#005DFF] text-[#005DFF]"
+                                                        : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                                )}
+                                            >
+                                                <CalendarIcon size={15} />
+                                                <span className="whitespace-nowrap">
+                                                    {formik.values.publishedDate
+                                                        ? format(new Date(formik.values.publishedDate), "MMM d, yyyy")
+                                                        : "Pick publish date"}
+                                                </span>
+                                                {formik.values.publishedDate && (
+                                                    <span
+                                                        role="button"
+                                                        onClick={(e) => { e.stopPropagation(); formik.setFieldValue('publishedDate', ''); }}
+                                                        className="ml-1 rounded-full hover:bg-blue-100 p-0.5 transition-colors"
+                                                    >
+                                                        <CircleX size={13} />
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 shadow-lg border-gray-100" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={formik.values.publishedDate ? new Date(formik.values.publishedDate) : undefined}
+                                                onSelect={(d) => formik.setFieldValue('publishedDate', d ? d.toISOString() : '')}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                 </form>

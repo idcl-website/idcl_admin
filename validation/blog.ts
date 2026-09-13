@@ -17,4 +17,21 @@ export const blogSchema = yup.object().shape({
         .string()
         .required('location is required')
         .min(2, 'Track must be at least 2 characters'),
+
+    // SEO fields (all optional)
+    metaTitle: yup
+        .string()
+        .max(60, 'Keep the meta title at or under 60 characters'),
+    metaDescription: yup
+        .string()
+        .max(160, 'Keep the meta description at or under 160 characters'),
+    slug: yup
+        .string()
+        .matches(/^\/?[a-z0-9]+(-[a-z0-9]+)*\/?$/, 'Slug can only contain lowercase letters, numbers and hyphens'),
+    primaryKeywords: yup.string(),
+    secondaryKeywords: yup.string(),
+    publishedDate: yup.string().nullable(),
+    isPublished: yup.boolean(),
+    author: yup.string(),
+    tags: yup.string(),
 });

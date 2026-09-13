@@ -5,7 +5,16 @@ interface CreateBlog {
     image?: string,
     snippet: string,
     body: string,
-    location: string
+    location: string,
+    metaTitle?: string,
+    metaDescription?: string,
+    slug?: string,
+    primaryKeywords?: string,
+    secondaryKeywords?: string,
+    publishedDate?: string | null,
+    isPublished?: boolean,
+    author?: string,
+    tags?: string,
 }
 
 

@@ -1,5 +1,5 @@
 "use client"
-import { Search, Eye, Trash2, SquarePen, Loader2, CircleX } from "lucide-react";
+import { Search, Eye, Trash2, SquarePen, Loader2, CircleX, ImagePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Dialog,
@@ -46,6 +46,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { formateDate } from "@/HelperFunctions/convertDate";
+import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
 import { BlogSkeleton } from "@/skeletons/blog";
 
 
@@ -58,7 +59,16 @@ export interface Blogs {
     createdAt: string,
     location: string,
     time: string,
-    date: string
+    date: string,
+    metaTitle?: string,
+    metaDescription?: string,
+    slug?: string,
+    primaryKeywords?: string,
+    secondaryKeywords?: string,
+    publishedDate?: string,
+    isPublished?: boolean,
+    author?: string,
+    tags?: string,
 }
 
 export default function TalentPage() {
@@ -81,6 +91,41 @@ export default function TalentPage() {
         time: 'all',
         date: 'all'
     })
+    const [editImage, setEditImage] = useState<string | null>(null);
+    const [newEditImage, setNewEditImage] = useState<string | null>(null);
+    const [isImageUploading, setIsImageUploading] = useState(false);
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    const handleEditImageUpload = async (file: File) => {
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error(`Image too large. Maximum size is 5 MB (your file: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
+            return;
+        }
+
+        try {
+            setIsImageUploading(true);
+            const ImageUrl = await uploadToCloudinary(file);
+            if (ImageUrl) setNewEditImage(ImageUrl);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || "Upload failed. Please retry.");
+            } else {
+                toast.error("An unexpected error occurred");
+            }
+        } finally {
+            setIsImageUploading(false);
+        }
+    };
+
+    const deleteOldImage = async (url: string) => {
+        try {
+            await axios.post('/api/cloudinary/delete', { url });
+        } catch (error) {
+            console.error('Failed to delete old image:', error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         const getAllBlogs = async () => {
@@ -135,7 +180,16 @@ export default function TalentPage() {
             title: '',
             snippet: '',
             body: '',
-            location: ''
+            location: '',
+            metaTitle: '',
+            metaDescription: '',
+            slug: '',
+            primaryKeywords: '',
+            secondaryKeywords: '',
+            publishedDate: '',
+            isPublished: false,
+            author: '',
+            tags: ''
         },
         validationSchema: blogSchema,
         onSubmit: async (values) => {
@@ -146,10 +200,20 @@ export default function TalentPage() {
 
             try {
                 setIsLoadings(prev => ({ ...prev, isediting: true }));
-                await blogService.updateBlog(openEditDialogId, values);
+                const image = newEditImage ?? editImage ?? undefined;
+                await blogService.updateBlog(openEditDialogId, { ...values, image });
                 setFilteredBlogs(prev => prev.map(blog =>
-                    blog._id === openEditDialogId ? { ...blog, ...values } : blog
+                    blog._id === openEditDialogId ? { ...blog, ...values, image: image ?? blog.image } : blog
                 ));
+
+                if (newEditImage && editImage) {
+                    try {
+                        await deleteOldImage(editImage);
+                    } catch {
+                        toast.warning('Post updated, but the old cover image could not be removed from storage.');
+                    }
+                }
+
                 toast.success('Blog updated successfully');
                 setOpenEditDialogId(null);
             } catch (error: unknown) {
@@ -168,6 +232,8 @@ export default function TalentPage() {
     useEffect(() => {
         if (!openEditDialogId) {
             editFormik.resetForm();
+            setEditImage(null);
+            setNewEditImage(null);
         }
     }, [openEditDialogId]);
 
@@ -179,8 +245,19 @@ export default function TalentPage() {
                     title: blog.title,
                     snippet: blog.snippet,
                     body: blog.body,
-                    location: blog.location
+                    location: blog.location,
+                    metaTitle: blog.metaTitle ?? '',
+                    metaDescription: blog.metaDescription ?? '',
+                    slug: blog.slug ?? '',
+                    primaryKeywords: blog.primaryKeywords ?? '',
+                    secondaryKeywords: blog.secondaryKeywords ?? '',
+                    publishedDate: blog.publishedDate ?? '',
+                    isPublished: blog.isPublished ?? false,
+                    author: blog.author ?? '',
+                    tags: blog.tags ?? ''
                 });
+                setEditImage(blog.image ?? null);
+                setNewEditImage(null);
             }
         }
     }, [openEditDialogId, blogs]);
@@ -401,6 +478,58 @@ export default function TalentPage() {
                                                             Make all necessary changes before submitting
                                                         </DialogDescription>
                                                         <form onSubmit={editFormik.handleSubmit} className="w-full">
+                                                            {/* Cover image */}
+                                                            <div className="w-full mb-4">
+                                                                <Label>Cover Image</Label>
+                                                                <div className="relative w-full h-48 rounded-xl overflow-hidden border border-gray-200 mt-2">
+                                                                    {(newEditImage ?? editImage) ? (
+                                                                        <Image
+                                                                            src={newEditImage ?? editImage!}
+                                                                            alt="Cover preview"
+                                                                            fill
+                                                                            className="object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs bg-gray-50">
+                                                                            No cover image
+                                                                        </div>
+                                                                    )}
+                                                                    {isImageUploading && (
+                                                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
+                                                                            <Loader2 className="animate-spin text-white w-4 h-4" />
+                                                                            <span className="text-white text-xs">Uploading...</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="mt-2 flex flex-wrap items-center gap-3">
+                                                                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-full cursor-pointer shadow-sm border border-gray-200 transition-colors">
+                                                                        <ImagePlus size={13} />
+                                                                        Change image
+                                                                        <input
+                                                                            type="file"
+                                                                            accept=".jpg,.jpeg,.png,.svg"
+                                                                            className="sr-only"
+                                                                            onChange={async (e) => {
+                                                                                const file = e.target.files?.[0];
+                                                                                if (file) await handleEditImageUpload(file);
+                                                                            }}
+                                                                        />
+                                                                    </label>
+                                                                    {newEditImage && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setNewEditImage(null)}
+                                                                            className="text-xs font-medium text-gray-500 hover:text-gray-900 underline underline-offset-2"
+                                                                        >
+                                                                            Revert to original
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                                {newEditImage && (
+                                                                    <p className="text-xs text-gray-400 mt-1">The current image will be deleted from storage when you save.</p>
+                                                                )}
+                                                            </div>
+
                                                             <div className="w-full grid grid-cols-1 gap-2">
                                                                 {/* Name Field */}
                                                                 <div className={cn("gap-1.5 mb-4")}>
@@ -475,6 +604,194 @@ export default function TalentPage() {
                                                                     {editFormik.touched.body && editFormik.errors.body && (
                                                                         <p className="text-red-500 text-xs mt-1">{editFormik.errors.body}</p>
                                                                     )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* SEO & Publishing */}
+                                                            <div className="w-full mb-4">
+                                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">SEO & Publishing</p>
+
+                                                                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                    <div className={cn("gap-1.5 mb-4 sm:col-span-2")}>
+                                                                        <Label htmlFor='metaTitle'>Meta Title <span className="text-gray-400 font-normal text-xs">(~60 chars)</span></Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='metaTitle'
+                                                                            name='metaTitle'
+                                                                            maxLength={60}
+                                                                            placeholder='Founder Dojo Imo: 9 Startups Built in Imo State | IDCL'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.metaTitle}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                        <div className="flex items-center justify-between text-xs text-gray-400">
+                                                                            <span>{editFormik.touched.metaTitle && editFormik.errors.metaTitle}</span>
+                                                                            <span>{editFormik.values.metaTitle.length}/60</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4 sm:col-span-2")}>
+                                                                        <Label htmlFor='metaDescription'>Meta Description <span className="text-gray-400 font-normal text-xs">(~155 chars)</span></Label>
+                                                                        <Textarea
+                                                                            id='metaDescription'
+                                                                            name='metaDescription'
+                                                                            rows={2}
+                                                                            maxLength={160}
+                                                                            placeholder='Short SEO-friendly summary shown in search results'
+                                                                            className="w-full min-h-[80px] text-sm sm:text-[15px]"
+                                                                            value={editFormik.values.metaDescription}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                        <div className="flex items-center justify-between text-xs text-gray-400">
+                                                                            <span>{editFormik.touched.metaDescription && editFormik.errors.metaDescription}</span>
+                                                                            <span>{editFormik.values.metaDescription.length}/160</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4 sm:col-span-2")}>
+                                                                        <Label htmlFor='slug'>URL Slug</Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='slug'
+                                                                            name='slug'
+                                                                            placeholder='/founder-dojo-imo-9-startups-built-in-imo-state'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.slug}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                        {editFormik.touched.slug && editFormik.errors.slug && (
+                                                                            <p className="text-red-500 text-xs mt-1">{editFormik.errors.slug}</p>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4")}>
+                                                                        <Label htmlFor='primaryKeywords'>Primary Keywords</Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='primaryKeywords'
+                                                                            name='primaryKeywords'
+                                                                            placeholder='Comma-separated'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.primaryKeywords}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4")}>
+                                                                        <Label htmlFor='secondaryKeywords'>Secondary Keywords</Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='secondaryKeywords'
+                                                                            name='secondaryKeywords'
+                                                                            placeholder='Comma-separated'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.secondaryKeywords}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4")}>
+                                                                        <Label htmlFor='author'>Written By</Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='author'
+                                                                            name='author'
+                                                                            placeholder='Primus Amaefule'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.author}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4")}>
+                                                                        <Label htmlFor='tags'>Suggested Tags</Label>
+                                                                        <Input
+                                                                            type='text'
+                                                                            id='tags'
+                                                                            name='tags'
+                                                                            placeholder='#FounderDojoImo, #ImoDigitalCity'
+                                                                            className="w-full placeholder:font-figtree text-[16px] font-normal"
+                                                                            value={editFormik.values.tags}
+                                                                            onChange={editFormik.handleChange}
+                                                                            onBlur={editFormik.handleBlur}
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className={cn("gap-1.5 mb-4 sm:col-span-2")}>
+                                                                        <Label>Published</Label>
+                                                                        <div className="flex flex-wrap items-center gap-3">
+                                                                            <div className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 p-0.5">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => editFormik.setFieldValue('isPublished', false)}
+                                                                                    className={cn(
+                                                                                        "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                                                                        !editFormik.values.isPublished
+                                                                                            ? "bg-white text-gray-900 shadow-sm"
+                                                                                            : "text-gray-500 hover:text-gray-700"
+                                                                                    )}
+                                                                                >
+                                                                                    Draft
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => editFormik.setFieldValue('isPublished', true)}
+                                                                                    className={cn(
+                                                                                        "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                                                                        editFormik.values.isPublished
+                                                                                            ? "bg-[#005DFF] text-white shadow-sm"
+                                                                                            : "text-gray-500 hover:text-gray-700"
+                                                                                    )}
+                                                                                >
+                                                                                    Published
+                                                                                </button>
+                                                                            </div>
+
+                                                                            <Popover>
+                                                                                <PopoverTrigger asChild>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        className={cn(
+                                                                                            "h-9 flex items-center gap-2 px-3 rounded-lg border text-sm bg-white transition-colors",
+                                                                                            editFormik.values.publishedDate
+                                                                                                ? "border-[#005DFF] text-[#005DFF]"
+                                                                                                : "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                                                                                        )}
+                                                                                    >
+                                                                                        <CalendarIcon size={15} />
+                                                                                        <span className="whitespace-nowrap">
+                                                                                            {editFormik.values.publishedDate
+                                                                                                ? format(new Date(editFormik.values.publishedDate), "MMM d, yyyy")
+                                                                                                : "Pick publish date"}
+                                                                                        </span>
+                                                                                        {editFormik.values.publishedDate && (
+                                                                                            <span
+                                                                                                role="button"
+                                                                                                onClick={(e) => { e.stopPropagation(); editFormik.setFieldValue('publishedDate', ''); }}
+                                                                                                className="ml-1 rounded-full hover:bg-blue-100 p-0.5 transition-colors"
+                                                                                            >
+                                                                                                <CircleX size={13} />
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </button>
+                                                                                </PopoverTrigger>
+                                                                                <PopoverContent className="w-auto p-0 shadow-lg border-gray-100" align="start">
+                                                                                    <Calendar
+                                                                                        mode="single"
+                                                                                        selected={editFormik.values.publishedDate ? new Date(editFormik.values.publishedDate) : undefined}
+                                                                                        onSelect={(d) => editFormik.setFieldValue('publishedDate', d ? d.toISOString() : '')}
+                                                                                        initialFocus
+                                                                                    />
+                                                                                </PopoverContent>
+                                                                            </Popover>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
