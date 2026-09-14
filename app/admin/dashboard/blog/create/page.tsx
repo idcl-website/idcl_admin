@@ -23,44 +23,38 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
+import { HtmlPreview } from "@/components/blog/html-preview";
 
 
 export default function CreateBlog() {
     const router = useRouter();
     const [imageFile, setImageFile] = useState<string | undefined>(undefined);
     const [isUploading, setIsUploading] = useState(false)
+    const [editorMode, setEditorMode] = useState<'visual' | 'html'>('visual');
+    const [htmlSource, setHtmlSource] = useState('');
     const editorRef = useRef<HTMLDivElement>(null);
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-    // Keeps the pasted HTML's styles, classes and links intact while removing
-    // anything that could execute (scripts, iframes, event handlers, javascript: URLs).
-    const sanitizeEditorHtml = (html: string) => {
-        if (!html) return html;
+    const switchToHtmlMode = () => {
+        setHtmlSource(formik.values.body);
+        setEditorMode('html');
+    };
 
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-
-        doc.querySelectorAll('script, iframe, object, embed, meta, link, base, title, head').forEach((el) => el.remove());
-        doc.querySelectorAll('*').forEach((el) => {
-            [...el.attributes].forEach((attr) => {
-                if (attr.name.toLowerCase().startsWith('on')) el.removeAttribute(attr.name);
-            });
-        });
-        doc.querySelectorAll('a[href]').forEach((el) => {
-            const href = el.getAttribute('href') ?? '';
-            if (href.trim().toLowerCase().startsWith('javascript:')) el.setAttribute('href', '#');
-        });
-        doc.querySelectorAll('img[src]').forEach((el) => {
-            const src = el.getAttribute('src') ?? '';
-            if (src.trim().toLowerCase().startsWith('javascript:')) el.removeAttribute('src');
-        });
-
-        return doc.body.innerHTML;
+    const switchToVisualMode = () => {
+        const clean = sanitizeHtml(htmlSource || formik.values.body);
+        formik.setFieldValue('body', clean);
+        if (editorRef.current) {
+            editorRef.current.innerHTML = clean;
+        }
+        setHtmlSource('');
+        setEditorMode('visual');
     };
 
     const syncEditorToFormik = () => {
         if (!editorRef.current) return;
-        const clean = sanitizeEditorHtml(editorRef.current.innerHTML);
+        const clean = sanitizeHtml(editorRef.current.innerHTML);
         if (editorRef.current.innerHTML !== clean) {
             editorRef.current.innerHTML = clean;
         }
@@ -115,10 +109,16 @@ export default function CreateBlog() {
                     return;
                 }
 
-                await blogService.createBlog({ ...values, image: imageFile });
+                const body = editorMode === 'html'
+                    ? sanitizeHtml(htmlSource || formik.values.body)
+                    : values.body;
+
+                await blogService.createBlog({ ...values, body, image: imageFile });
                 toast.success('Blog post published')
                 formik.resetForm();
                 setImageFile(undefined);
+                setHtmlSource('');
+                setEditorMode('visual');
                 if (editorRef.current) editorRef.current.innerHTML = '';
                 router.push('/admin/dashboard/blog')
             } catch (error: unknown) {
@@ -303,43 +303,108 @@ export default function CreateBlog() {
 
                     {/* Body / Rich text editor */}
                     <section className="space-y-1.5">
-                        <Label htmlFor="body" className="text-sm font-medium text-gray-700">Content</Label>
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                            <Label htmlFor="body" className="text-sm font-medium text-gray-700">Content</Label>
+                            <div className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 p-0.5">
+                                <button
+                                    type="button"
+                                    onClick={switchToVisualMode}
+                                    className={cn(
+                                        "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                        editorMode === 'visual'
+                                            ? "bg-white text-gray-900 shadow-sm"
+                                            : "text-gray-500 hover:text-gray-700"
+                                    )}
+                                >
+                                    Visual
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={switchToHtmlMode}
+                                    className={cn(
+                                        "px-3 py-1 text-xs font-medium rounded-full transition-colors",
+                                        editorMode === 'html'
+                                            ? "bg-[#005DFF] text-white shadow-sm"
+                                            : "text-gray-500 hover:text-gray-700"
+                                    )}
+                                >
+                                    HTML
+                                </button>
+                            </div>
+                        </div>
                         <div className={cn(
                             "rounded-xl border border-gray-200 overflow-hidden",
                             formik.touched.body && formik.errors.body && "border-red-400"
                         )}>
-                            {/* Sticky toolbar */}
-                            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-3 py-2">
-                                <RichTextControllers />
-                            </div>
-                            <div className="relative">
-                                <div
-                                    ref={editorRef}
-                                    contentEditable
-                                    suppressContentEditableWarning
-                                    onInput={syncEditorToFormik}
-                                    onPaste={(e) => {
-                                        e.preventDefault();
-                                        const html = e.clipboardData.getData('text/html');
-                                        const text = e.clipboardData.getData('text/plain');
+                            {editorMode === 'visual' ? (
+                                <>
+                                    {/* Sticky toolbar */}
+                                    <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-3 py-2">
+                                        <RichTextControllers />
+                                    </div>
+                                    <div className="relative">
+                                        <div
+                                            ref={editorRef}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onInput={syncEditorToFormik}
+                                            onPaste={(e) => {
+                                                e.preventDefault();
+                                                const html = e.clipboardData.getData('text/html');
+                                                const text = e.clipboardData.getData('text/plain');
 
-                                        if (html) {
-                                            document.execCommand('insertHTML', false, sanitizeEditorHtml(html));
-                                        } else {
-                                            document.execCommand('insertText', false, text);
-                                        }
+                                                if (html) {
+                                                    document.execCommand('insertHTML', false, sanitizeHtml(html));
+                                                } else {
+                                                    document.execCommand('insertText', false, text);
+                                                }
 
-                                        requestAnimationFrame(syncEditorToFormik);
-                                    }}
-                                    onBlur={() => formik.setFieldTouched('body', true)}
-                                    className="min-h-[400px] text-base leading-relaxed p-4 outline-none [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-blue-600 [&_a]:underline"
-                                />
-                                {!formik.values.body && (
-                                    <p className="absolute top-4 left-4 text-gray-400 text-base pointer-events-none select-none">
-                                        Start writing your post...
-                                    </p>
-                                )}
-                            </div>
+                                                requestAnimationFrame(syncEditorToFormik);
+                                            }}
+                                            onBlur={() => formik.setFieldTouched('body', true)}
+                                            className="min-h-[400px] text-base leading-relaxed p-4 outline-none [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-blue-600 [&_a]:underline"
+                                        />
+                                        {!formik.values.body && (
+                                            <p className="absolute top-4 left-4 text-gray-400 text-base pointer-events-none select-none">
+                                                Start writing your post...
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div>
+                                    <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
+                                        <p className="text-xs text-gray-500 font-medium">
+                                            Paste the full HTML source — styles, classes and links are kept verbatim.
+                                        </p>
+                                    </div>
+                                    <textarea
+                                        value={htmlSource}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setHtmlSource(value);
+                                            formik.setFieldValue('body', sanitizeHtml(value));
+                                        }}
+                                        onBlur={() => formik.setFieldTouched('body', true)}
+                                        spellCheck={false}
+                                        className="w-full min-h-[400px] font-mono text-[13px] leading-relaxed p-4 outline-none resize-y bg-white"
+                                        placeholder="Paste your designed news HTML here, e.g.
+
+&lt;style&gt; ... your design styles ... &lt;/style&gt;
+&lt;h2&gt;Heading&lt;/h2&gt;
+&lt;p&gt;Body text with a &lt;a href=&quot;https://...&quot;&gt;link&lt;/a&gt;&lt;/p&gt;"
+                                    />
+                                    <div>
+                                        <div className="px-3 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                                            <span className="text-xs text-gray-500 font-medium">Live preview</span>
+                                            <span className="text-[10px] text-gray-400">styles are scoped to this preview</span>
+                                        </div>
+                                        <div className="p-4 bg-white rounded-b-xl">
+                                            <HtmlPreview html={formik.values.body} className="text-gray-700" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         {formik.touched.body && formik.errors.body && (
                             <p className="text-red-500 text-xs">{formik.errors.body}</p>

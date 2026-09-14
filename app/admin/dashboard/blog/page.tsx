@@ -48,6 +48,7 @@ import {
 import { formateDate } from "@/HelperFunctions/convertDate";
 import { uploadToCloudinary } from "@/HelperFunctions/uploadToCloudinary";
 import { BlogSkeleton } from "@/skeletons/blog";
+import { HtmlPreview } from "@/components/blog/html-preview";
 
 
 export interface Blogs {
@@ -419,19 +420,9 @@ export default function TalentPage() {
 
                                                     {/* Body */}
                                                     <DialogDescription asChild>
-                                                        <div
-                                                            className="text-gray-700 leading-relaxed text-[15px] space-y-3
-                                                                [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-6 [&_h1]:mb-2
-                                                                [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-gray-800 [&_h2]:mt-5 [&_h2]:mb-2
-                                                                [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-1
-                                                                [&_p]:my-2 [&_p]:leading-relaxed
-                                                                [&_blockquote]:border-l-4 [&_blockquote]:border-gray-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_blockquote]:my-4
-                                                                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1
-                                                                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1
-                                                                [&_a]:text-[#005DFF] [&_a]:underline [&_a]:underline-offset-2
-                                                                [&_strong]:font-semibold [&_em]:italic"
-                                                            dangerouslySetInnerHTML={{ __html: news.body }}
-                                                        />
+                                                        <div className="text-gray-700 leading-relaxed text-[15px]">
+                                                            <HtmlPreview html={news.body} />
+                                                        </div>
                                                     </DialogDescription>
                                                 </div>
                                             </DialogContent>
